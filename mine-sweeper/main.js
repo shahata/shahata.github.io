@@ -50,13 +50,30 @@ function invokeNeighbors(i, callback) {
 
 function revealBlocks(i) {
   if (i >= 0 && i < game.length && !game[i].revealed && !game[i].flagged) {
-    game[i].revealed = true;
     nodes[i].style.display = 'none';
-
-    if (game[i].value === 0) {
-      invokeNeighbors(i, revealBlocks);
+    if (game[i].value === '*') {
+      setTimeout(function () {
+        alert('You lose!!!');
+        initGame();
+      }, 10);
+    } else {
+      game[i].revealed = true;
+      if (game[i].value === 0) {
+        invokeNeighbors(i, revealBlocks);
+      }
     }
   }
+}
+
+function handleDblClick(i) {
+  var flags = 0;
+  invokeNeighbors(i, function (x) {
+    flags += (game[x].flagged ? 1 : 0);
+  });
+  if (flags >= game[i].value) {
+    invokeNeighbors(i, revealBlocks);
+  }
+  saveGame();
 }
 
 function handleClick(i, e) {
@@ -68,23 +85,15 @@ function handleClick(i, e) {
       nodes[i].innerHTML = (game[i].flagged ? 'Flag' : '');
       guesses[game[i].value === '*' ? 'good' : 'bad'] += (game[i].flagged ? 1 : -1);
       if (guesses.good === mines) {
-        return setTimeout(function () {
+        setTimeout(function () {
           alert('You win!!!');
           initGame();
         }, 10);
       }
       updateFlagsLeft();
     }
-  } else if (!game[i].revealed && !game[i].flagged) {
-    if (game[i].value === '*') {
-      nodes[i].style.display = 'none';
-      return setTimeout(function () {
-        alert('You lose!!!');
-        initGame();
-      }, 10);
-    } else {
-      revealBlocks(i);
-    }
+  } else {
+    revealBlocks(i);
   }
   saveGame();
 }
@@ -156,6 +165,7 @@ initGame = function (loadedGame) {
     nodes[i].style.display = game[i].revealed ? 'none' : 'block';
     nodes[i].innerHTML = game[i].flagged ? 'Flag' : '';
     nodes[i].parentNode.onclick = handleClick.bind(undefined, i);
+    nodes[i].parentNode.ondblclick = handleDblClick.bind(undefined, i);
   }
   superman();
   updateFlagsLeft();
