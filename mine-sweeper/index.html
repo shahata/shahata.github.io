@@ -2,9 +2,15 @@
   <body>
     <style>
       table {
-        position: absolute;
+        margin: auto;
+        position: relative;
         top: 100px;
         -webkit-user-select: none;
+      }
+      div, a {
+        position: relative;
+        text-align: center;
+        margin: auto;
       }
       td {
         position: relative;
@@ -27,6 +33,9 @@
       }
     </style>
 
+    <input type="checkbox" id="superman" onclick="superman()"><label for="superman">superman</label><br/>
+    width<input id="width" value="10"/>height<input id="height" value="8"/>mines<input id="mines" value="9"/><br/>
+    <a href="#" onclick="initGame(); return false;">New game</a>
     <div id="flags-left"></div>
     <table id="game"></table>
     <script src="main.js"></script>
