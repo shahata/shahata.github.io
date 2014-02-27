@@ -34,22 +34,28 @@ function updateFlagsLeft() {
 }
 
 function invokeNeighbors(i, callback) {
+  function callbackCheckBoundaries(x) {
+    if (x >= 0 && x < game.length) {
+      callback(x);
+    }
+  }
+
   if (i % width !== 0) {
-    callback(i - 1);
-    callback(i - width - 1);
-    callback(i + width - 1);
+    callbackCheckBoundaries(i - 1);
+    callbackCheckBoundaries(i - width - 1);
+    callbackCheckBoundaries(i + width - 1);
   }
   if (i % width !== width - 1) {
-    callback(i + 1);
-    callback(i - width + 1);
-    callback(i + width + 1);
+    callbackCheckBoundaries(i + 1);
+    callbackCheckBoundaries(i - width + 1);
+    callbackCheckBoundaries(i + width + 1);
   }
-  callback(i - width);
-  callback(i + width);
+  callbackCheckBoundaries(i - width);
+  callbackCheckBoundaries(i + width);
 }
 
 function revealBlocks(i) {
-  if (i >= 0 && i < game.length && !game[i].revealed && !game[i].flagged) {
+  if (!game[i].revealed && !game[i].flagged) {
     nodes[i].style.display = 'none';
     if (game[i].value === '*') {
       setTimeout(function () {
@@ -118,7 +124,7 @@ function newGame() {
   var game = [];
 
   function updateCell(i) {
-    if (i >= 0 && i < game.length && game[i].value !== '*') {
+    if (game[i].value !== '*') {
       game[i].value++;
     }
   }
