@@ -18,35 +18,22 @@ function gameToInt(game, player) {
 }
 
 function generateWinningPositions() {
-  var i, j, game, winningPositions = [];
+  var winningPositions = [];
 
-  for (i = 0; i < width; i++) {
-    game = newGame();
-    for (j = 0; j < width; j++) {
-      game[(i * width) + j] = 'X';
+  var gameD1 = newGame(), gameD2 = newGame();
+  for (var i = 0; i < width; i++) {
+    var gameH = newGame(), gameV = newGame();
+    gameD1[i + (i * width)] = 'X';
+    gameD2[width - i - 1 + (i * width)] = 'X';
+    for (var j = 0; j < width; j++) {
+      gameH[(i * width) + j] = 'X';
+      gameV[i + (j * width)] = 'X';
     }
-    winningPositions.push(gameToInt(game, 'X'));
+    winningPositions.push(gameToInt(gameH, 'X'));
+    winningPositions.push(gameToInt(gameV, 'X'));
   }
-
-  for (i = 0; i < width; i++) {
-    game = newGame();
-    for (j = 0; j < width; j++) {
-      game[i + (j * width)] = 'X';
-    }
-    winningPositions.push(gameToInt(game, 'X'));
-  }
-
-  game = newGame();
-  for (i = 0; i < width; i++) {
-    game[i + (i * width)] = 'X';
-  }
-  winningPositions.push(gameToInt(game, 'X'));
-
-  game = newGame();
-  for (i = 0; i < width; i++) {
-    game[width - i - 1 + (i * width)] = 'X';
-  }
-  winningPositions.push(gameToInt(game, 'X'));
+  winningPositions.push(gameToInt(gameD1, 'X'));
+  winningPositions.push(gameToInt(gameD2, 'X'));
 
   return winningPositions;
 }
@@ -91,7 +78,6 @@ function getNextMove(game, me, player, depth) {
       }
     }
   }
-
   return bestMove;
 }
 
