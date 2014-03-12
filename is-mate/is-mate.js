@@ -101,10 +101,10 @@ function createBoard(pawns) {
     game.push(row);
   }
 
-  for (var p = 0; p < pawns.length; p++) {
-    game[pawns[p].x][pawns[p].y].pawn = pawns[p];
-    pawns[p].id = p;
-  }
+  pawns.forEach(function (pawn, id) {
+    game[pawn.x][pawn.y].pawn = pawn;
+    pawn.id = id;
+  });
 
   return game;
 }
@@ -113,17 +113,17 @@ function isCheck(game, pawns) {
   var king;
   console.log('.');
 
-  for (var p = 0; p < pawns.length; p++) {
-    if (pawns[p].opponent) {
-      routeProviders[pawns[p].type](pawns[p], game).forEach(function (move) {
-        game[move.x][move.y].threats.push({id: p, direction: move.direction});
+  pawns.forEach(function (pawn) {
+    if (pawn.opponent) {
+      routeProviders[pawn.type](pawn, game).forEach(function (move) {
+        game[move.x][move.y].threats.push({id: pawn.id, direction: move.direction});
       });
-    } else if (pawns[p].type === 'K') {
-      king = pawns[p];
+    } else if (pawn.type === 'K') {
+      king = pawn;
     }
-  }
+  });
 
-  return game[king.x][king.y].threats.length;
+  return game[king.x][king.y].threats.length > 0;
 }
 
 function isMate(pawns) {
@@ -138,24 +138,20 @@ function isMate(pawns) {
     return true;
   }
 
-  for (var p = 0; p < pawns.length; p++) {
-    if (!pawns[p].opponent && pawns[p].type !== 'K') {
-      if (routeProviders[pawns[p].type](pawns[p], game).some(function (move) {
-        if (_.findWhere(game[move.x][move.y].threats, threats[0]) ||
-            (game[move.x][move.y].pawn && game[move.x][move.y].pawn.id === threats[0].id)) {
-          var dupPawns = _.clone(pawns);
-          dupPawns[p] = _.extend({}, pawns[p], {x: move.x, y: move.y});
-          if (game[move.x][move.y].pawn) {
-            dupPawns.splice(game[move.x][move.y].pawn.id, 1);
-          }
-          return !isCheck(createBoard(dupPawns), dupPawns);
+  return pawns.every(function (pawn) {
+    return (pawn.opponent || pawn.type === 'K' || routeProviders[pawn.type](pawn, game).every(function (move) {
+      if ((threats[0].direction && _.findWhere(game[move.x][move.y].threats, threats[0])) ||
+          (game[move.x][move.y].pawn && game[move.x][move.y].pawn.id === threats[0].id)) {
+        var dupPawns = _.clone(pawns);
+        dupPawns[pawn.id] = _.extend({}, pawn, {x: move.x, y: move.y});
+        if (game[move.x][move.y].pawn) {
+          dupPawns.splice(game[move.x][move.y].pawn.id, 1);
         }
-      })) {
-        return false;
+        return isCheck(createBoard(dupPawns), dupPawns);
       }
-    }
-  }
-  return true;
+      return false;
+    }));
+  });
 }
 
 var pawns = [

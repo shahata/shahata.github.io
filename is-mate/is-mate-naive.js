@@ -101,10 +101,10 @@ function createBoard(pawns) {
     game.push(row);
   }
 
-  for (var p = 0; p < pawns.length; p++) {
-    game[pawns[p].x][pawns[p].y].pawn = pawns[p];
-    pawns[p].id = p;
-  }
+  pawns.forEach(function (pawn, id) {
+    game[pawn.x][pawn.y].pawn = pawn;
+    pawn.id = id;
+  });
 
   return game;
 }
@@ -112,16 +112,11 @@ function createBoard(pawns) {
 function isCheck(game, pawns) {
   console.log('.');
   var king = _.findWhere(pawns, {type: 'K', opponent: false});
-  for (var o = 0; o < pawns.length; o++) {
-    if (pawns[o].opponent) {
-      if (routeProviders[pawns[o].type](pawns[o], game).some(function (move) {
-        return (move.x === king.x && move.y === king.y);
-      })) {
-        return true;
-      }
-    }
-  }
-  return false;
+  return pawns.some(function (pawn) {
+    return (pawn.opponent && routeProviders[pawn.type](pawn, game).some(function (move) {
+      return (move.x === king.x && move.y === king.y);
+    }));
+  });
 }
 
 function isMate(pawns) {
@@ -129,21 +124,16 @@ function isMate(pawns) {
   if (!isCheck(game, pawns)) {
     return false;
   }
-  for (var p = 0; p < pawns.length; p++) {
-    if (!pawns[p].opponent) {
-      if (routeProviders[pawns[p].type](pawns[p], game).some(function (move) {
-        var dupPawns = _.clone(pawns);
-        dupPawns[p] = _.extend({}, pawns[p], {x: move.x, y: move.y});
-        if (game[move.x][move.y].pawn) {
-          dupPawns.splice(game[move.x][move.y].pawn.id, 1);
-        }
-        return !isCheck(createBoard(dupPawns), dupPawns);
-      })) {
-        return false;
+  return pawns.every(function (pawn) {
+    return (pawn.opponent || routeProviders[pawn.type](pawn, game).every(function (move) {
+      var dupPawns = _.clone(pawns);
+      dupPawns[pawn.id] = _.extend({}, pawn, {x: move.x, y: move.y});
+      if (game[move.x][move.y].pawn) {
+        dupPawns.splice(game[move.x][move.y].pawn.id, 1);
       }
-    }
-  }
-  return true;
+      return isCheck(createBoard(dupPawns), dupPawns);
+    }));
+  });
 }
 
 var pawns = [
