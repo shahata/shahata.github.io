@@ -68,6 +68,12 @@ function pawnRoute(pawn, game) {
     add(pawn.x - 1, pawn.y + 1);
     add(pawn.x + 1, pawn.y + 1);
   } else {
+    if (game[pawn.x - 1][pawn.y - 1].pawn && game[pawn.x - 1][pawn.y - 1].pawn.opponent) {
+      add(pawn.x - 1, pawn.y - 1);
+    }
+    if (game[pawn.x + 1][pawn.y - 1].pawn && game[pawn.x + 1][pawn.y - 1].pawn.opponent) {
+      add(pawn.x + 1, pawn.y - 1);
+    }
     add(pawn.x, pawn.y - 1);
     if (pawn.y === 6) {
       add(pawn.x, pawn.y - 2);
@@ -140,7 +146,7 @@ function isMate(pawns) {
           var dupPawns = _.clone(pawns);
           dupPawns[p] = _.extend({}, pawns[p], {x: move.x, y: move.y});
           if (game[move.x][move.y].pawn) {
-            delete dupPawns[game[move.x][move.y].pawn.id];
+            dupPawns.splice(game[move.x][move.y].pawn.id, 1);
           }
           return !isCheck(createBoard(dupPawns), dupPawns);
         }
