@@ -95,7 +95,7 @@ function createBoard(pawns) {
     game.push(row);
   }
 
-  for (var p in pawns) {
+  for (var p = 0; p < pawns.length; p++) {
     game[pawns[p].x][pawns[p].y].pawn = pawns[p];
     pawns[p].id = p;
   }
@@ -107,7 +107,7 @@ function isCheck(game, pawns) {
   var king;
   console.log('.');
 
-  for (var p in pawns) {
+  for (var p = 0; p < pawns.length; p++) {
     if (pawns[p].opponent) {
       routeProviders[pawns[p].type](pawns[p], game).forEach(function (move) {
         game[move.x][move.y].threats.push({id: p, direction: move.direction});
@@ -122,7 +122,7 @@ function isCheck(game, pawns) {
 
 function isMate(pawns) {
   var game = createBoard(pawns);
-  var king = _.findWhere(pawns, {type: 'K'});
+  var king = _.findWhere(pawns, {type: 'K', opponent: false});
   var threats = game[king.x][king.y].threats;
   if (!isCheck(game, pawns) ||
       routeProviders.K(king, game).some(function (move) { return (game[move.x][move.y].threats.length === 0); })) {
@@ -132,7 +132,7 @@ function isMate(pawns) {
     return true;
   }
 
-  for (var p in pawns) {
+  for (var p = 0; p < pawns.length; p++) {
     if (!pawns[p].opponent && pawns[p].type !== 'K') {
       if (routeProviders[pawns[p].type](pawns[p], game).some(function (move) {
         if (_.findWhere(game[move.x][move.y].threats, threats[0]) ||
@@ -152,11 +152,11 @@ function isMate(pawns) {
   return true;
 }
 
-var pawns = {
-  '0': {type: 'K', opponent: false, x: 0, y: 0},
-  '1': {type: 'R', opponent: true, x: 0, y: 7},
-  '2': {type: 'R', opponent: true, x: 1, y: 6},
-  '3': {type: 'B', opponent: false, x: 5, y: 6}
-};
+var pawns = [
+  {type: 'K', opponent: false, x: 0, y: 0},
+  {type: 'R', opponent: true, x: 0, y: 7},
+  {type: 'R', opponent: true, x: 1, y: 6},
+  {type: 'B', opponent: false, x: 5, y: 6}
+];
 
 console.log(isMate(pawns));
