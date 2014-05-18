@@ -1,2 +1,2 @@
 #!/bin/bash
-node tic-tac-toe.js $1 $2
+node solution.js $1
