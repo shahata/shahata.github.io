@@ -1,0 +1,32 @@
+<!doctype html>
+<html ng-app="angularWidgetApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>angularWidget</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="styles/demo.css"/>
+  <body ng-init="widgets = [{id: 0, src: 'main'}]; options = {collapse: true}">
+    <a href="#" ng-click="widgets.push({id: widgets[widgets.length-1].id+1, src: 'main'})">add...</a>
+    <a href="#" ng-click="options.collapse = !options.collapse">{{options.collapse ? 'expand' : 'collapse'}} all...</a>
+    <br/><br/><br/>
+
+    <div ng-repeat="widget in widgets track by widget.id" style="float: left; position: relative">
+      <div ng-controller="widgetContainer">
+        <span ng-show="title" ng-bind="title"></span>
+        <a href="#" ng-click="widgets.splice($index, 1)">del</a>
+        <div ng-show="isLoading">LOADING...</div>
+        <div ng-show="isError">ERROR... <a href="#" ng-click="reload()">reload</a></div>
+        <ng-widget class="container" src="widget.src" options="options" ng-show="!isLoading && !isError"></ng-widget>
+      </div>
+    </div>
+
+    <script src="http://static.wix.com/services/third-party/angularjs/1.2.16/angular.min.js"></script>
+
+    <script src="scripts/demo.js"></script>
+
+    <script src="scripts/angular-widget.js"></script>
+  </body>
+</html>
