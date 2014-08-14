@@ -1,0 +1,87 @@
+<!doctype html>
+<!-- #if( false )
+  Prerequisites from server model:
+  --------------------------------
+  ${locale}, ${debug}, ${secured}, ${experiments},
+  ${newRelicEndUserHeader}, ${newRelicEndUserFooter}
+  ${clientTopology.angularMemoryGameSslStaticsUrl},
+  ${clientTopology.angularMemoryGameStaticsUrl},
+  ${clientTopology.staticBaseUrl},
+  ${clientTopology.sslStaticBaseUrl}
+
+  More details at: http://kb.wixpress.com/display/dashboard/How+to+integrate+server+with+index.vm
+#end -->
+<!--
+  #if( false )
+  DO NOT TOUCH!!
+  --------------
+  #end
+  #set( $languages = ["de","en","es","fr","it","ja","ko","pl","pt","ru","tr"] )
+  #if( !$languages.contains($locale) )
+    #set( $locale = "en" )
+  #end
+  #if( $secured )
+    #set( $staticsUrl = $clientTopology.angularMemoryGameSslStaticsUrl )
+    #set( $staticBaseUrl = $clientTopology.sslStaticBaseUrl )
+  #else
+    #set( $staticsUrl = $clientTopology.angularMemoryGameStaticsUrl )
+    #set( $staticBaseUrl = $clientTopology.staticBaseUrl )
+  #end
+-->
+<html ng-app="angularMemoryGameApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>angularMemoryGame</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="stylesheet" href="${staticBaseUrl}services/third-party/fonts/Helvetica/fontFace.css">
+    <link rel="stylesheet" href="${staticsUrl}styles/main.css"/>
+
+    <!-- #if( false ) -->
+    <script>
+      /* jshint ignore:start */
+      ENABLE_MOCKS = ${enableMocks};
+    </script>
+    <!-- #end -->
+
+    ${newRelicEndUserHeader}
+
+  </head>
+  <body>
+
+    <!-- Add your site or application content here -->
+    <div ng-include="'views/main.html'"></div>
+
+
+    <script src="${staticsUrl}bower_components/lodash/dist/lodash.js"></script>
+    <script src="${staticBaseUrl}services/third-party/jquery/2.0.3/jquery#if(!${debug}).min#{end}.js"></script>
+    <script src="${staticBaseUrl}services/third-party/angularjs/1.2.21/angular#if(!${debug}).min#{end}.js"></script>
+    <script src="${staticBaseUrl}services/third-party/angular-translate/1.1.1/angular-translate#if(!${debug}).min#{end}.js"></script>
+    <script src="${staticBaseUrl}services/third-party/angularjs/1.2.21/i18n/angular-locale_${locale}.js"></script>
+    <script src="${staticsUrl}scripts/locale/messages_${locale}.js"></script>
+    <script src="${staticsUrl}#if(${debug})concat/#{end}scripts/modules.js"></script>
+    <script src="${staticsUrl}#if(${debug})concat/#{end}scripts/scripts.js"></script>
+
+    <!-- #if( false ) -->
+    <script src="bower_components/angular-mocks/angular-mocks.js"></script>
+    <script src="#if(${debug})concat/#{end}scripts/mocks.js"></script>
+    <script>
+      if (ENABLE_MOCKS) {
+        angular.module('angularMemoryGameApp').requires.push('angularMemoryGameAppMocks');
+      }
+    </script>
+    <!-- #end -->
+    <script>
+      angular.module('angularMemoryGameApp').config(function (wixAngularProvider) {
+        wixAngularProvider.setStaticsUrl('${staticsUrl}');
+        wixAngularProvider.setExperiments(${experiments});
+      });
+    </script>
+
+    ${newRelicEndUserFooter}
+
+  </body>
+</html>

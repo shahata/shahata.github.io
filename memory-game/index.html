@@ -1,0 +1,91 @@
+<!doctype html>
+<!-- #if( false )
+  Prerequisites from server model:
+  --------------------------------
+  en, true, ${secured}, {},
+  , 
+  ${clientTopology.angularMemoryGameSslStaticsUrl},
+  ${clientTopology.angularMemoryGameStaticsUrl},
+  ${clientTopology.staticBaseUrl},
+  ${clientTopology.sslStaticBaseUrl}
+
+  More details at: http://kb.wixpress.com/display/dashboard/How+to+integrate+server+with+index.vm
+#end -->
+<!--
+  #if( false )
+  DO NOT TOUCH!!
+  --------------
+  #end
+  #set( $languages = ["de","en","es","fr","it","ja","ko","pl","pt","ru","tr"] )
+  #if( !$languages.contains($locale) )
+    #set( $locale = "en" )
+  #end
+  #if( $secured )
+    #set( $staticsUrl = $clientTopology.angularMemoryGameSslStaticsUrl )
+    #set( $staticBaseUrl = $clientTopology.sslStaticBaseUrl )
+  #else
+    #set( $staticsUrl = $clientTopology.angularMemoryGameStaticsUrl )
+    #set( $staticBaseUrl = $clientTopology.staticBaseUrl )
+  #end
+-->
+<html ng-app="angularMemoryGameApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>angularMemoryGame</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="stylesheet" href="http://static.pizza.wixpress.com/services/third-party/fonts/Helvetica/fontFace.css">
+    <!-- process-tags prefix('http://localhost:9000/') -->
+    <link rel="stylesheet" href="styles/main.css"/>
+    <!-- end-process-tags -->
+
+    <!-- #if( false ) -->
+    <script>
+      /* jshint ignore:start */
+      ENABLE_MOCKS = false;
+    </script>
+    <!-- #end -->
+
+    
+
+  </head>
+  <body>
+
+    <!-- Add your site or application content here -->
+    <div ng-include="'views/main.html'"></div>
+
+
+    <!-- process-tags prefix('http://localhost:9000/') -->
+    <script src="bower_components/lodash/dist/lodash.js"></script>
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-translate/angular-translate.js"></script>
+    <script src="bower_components/angular-i18n/angular-locale_en.js"></script>
+    <script src="scripts/locale/messages_en.js"></script>
+    <script src="scripts/modules.js"></script>
+    <script src="scripts/scripts.js"></script>
+    <!-- end-process-tags -->
+
+    <!-- #if( false ) -->
+    <script src="bower_components/angular-mocks/angular-mocks.js"></script>
+    <script src="scripts/mocks.js"></script>
+    <script>
+      if (ENABLE_MOCKS) {
+        angular.module('angularMemoryGameApp').requires.push('angularMemoryGameAppMocks');
+      }
+    </script>
+    <!-- #end -->
+    <script>
+      angular.module('angularMemoryGameApp').config(function (wixAngularProvider) {
+        wixAngularProvider.setStaticsUrl('http://localhost:9000/');
+        wixAngularProvider.setExperiments({});
+      });
+    </script>
+
+    
+
+  </body>
+</html>

@@ -1,0 +1,1 @@
+"use strict";angular.module("angularMemoryGameAppMocks",["ngMockE2E"]).run(["$httpBackend",function(a){a.whenGET(/.*/).passThrough(),a.whenPOST(/.*/).passThrough(),a.whenPUT(/.*/).passThrough(),a.whenDELETE(/.*/).passThrough()}]);
