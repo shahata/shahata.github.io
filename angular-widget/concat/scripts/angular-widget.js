@@ -1,127 +1,210 @@
 'use strict';
-angular.module('angularWidget', []).config(function () {
-  return;
-});
+
+angular.module('angularWidgetInternal', []);
+
+angular.module('angularWidget', ['angularWidgetInternal'])
+  .config(["$provide", "$injector", function ($provide, $injector) {
+    if (!$injector.has('$routeProvider')) {
+      return;
+    }
+    //this is a really ugly trick to prevent reloading of the ng-view in case
+    //an internal route changes, effecting only the router inside that view.
+    $provide.decorator('$rootScope', ["$delegate", "$injector", function ($delegate, $injector) {
+      var id, lastId, originalBroadcast = $delegate.$broadcast;
+      $delegate.$broadcast = function (name) {
+        var shouldAbort = false;
+        if (name === '$routeChangeSuccess') {
+          $injector.invoke(/* @ngInject */["$route", "widgets", "$location", function ($route, widgets, $location) {
+            lastId = id;
+            id = $route.current && $route.current.widgetId;
+            if (id && id === lastId) {
+              widgets.notifyWidgets('$locationChangeSuccess', $location.absUrl(), '');
+              shouldAbort = true;
+            }
+          }]);
+        }
+        return shouldAbort ? null : originalBroadcast.apply(this, arguments);
+      };
+      return $delegate;
+    }]);
+  }])
+  .config(["widgetsProvider", function (widgetsProvider) {
+    //sharing the $location between everyone is the only way to have
+    //a single source of truth about the current location.
+    widgetsProvider.addServiceToShare('$location', {
+      //list of setters. since those methods are both getters and setters
+      //we also pass the number of arguments passed to the function which
+      //makes it act like a setter. this is needed since we want to run
+      //a digest loop in the main app when some widget sets the location.
+      url: 1,
+      path: 1,
+      search: 2,
+      hash: 1,
+      $$parse: 1
+    });
+
+    //we want to pass the $locationChangeStart down to all widgets in order
+    //to let them a change to cancel the location change using preventDefault
+    widgetsProvider.addEventToForward('$locationChangeStart');
+  }]);
+
+angular.module('angularWidgetOnly', [])
+  .run(["$rootScope", "$location", function ($rootScope, $location) {
+    //widget - since $location is shared and is not going to be instantiated
+    //by the new injector of this widget, we send the $locationChangeSuccess
+    //ourselves to kickoff ng-rounte and ui-router ($location usually does that
+    //itself during instantiation)
+    $rootScope.$evalAsync(function () {
+      $rootScope.$broadcast('$locationChangeSuccess', $location.absUrl(), '');
+    });
+  }]);
+
+
 'use strict';
-angular.module('angularWidget').directive('ngWidget', [
-  '$http',
-  '$templateCache',
-  '$compile',
-  '$q',
-  '$timeout',
-  'tagAppender',
-  'widgets',
-  function ($http, $templateCache, $compile, $q, $timeout, tagAppender, widgets) {
+
+angular.module('angularWidgetInternal')
+  .directive('ngWidget', ["$http", "$templateCache", "$q", "$timeout", "tagAppender", "widgets", "$rootScope", "$log", function ($http, $templateCache, $q, $timeout, tagAppender, widgets, $rootScope, $log) {
     return {
       restrict: 'E',
       priority: 999,
       terminal: true,
       scope: {
         src: '=',
-        options: '='
+        options: '=',
+        delay: '@'
       },
       link: function (scope, element) {
         var changeCounter = 0, injector;
+
+        /* @ngInject */
+        function widgetConfigSection($provide, widgetConfigProvider) {
+          //force the widget to use the shared service instead of creating some instance
+          //since this is using a constant (which is available during config) to steal the
+          //show, we can theoretically use it to share providers, but that's for another day.
+          angular.forEach(widgets.getServicesToShare(), function (value, key) {
+            $provide.constant(key, value);
+          });
+
+          widgetConfigProvider.setParentInjectorScope(scope);
+        }
+        widgetConfigSection.$inject = ["$provide", "widgetConfigProvider"];
+
         function delayedPromise(promise, delay) {
           return $q.when(promise).then(function (result) {
             return $timeout(function () {
               return result;
-            }, delay || 1000);
+            }, delay === undefined ? 1000 : delay);
           }, function (result) {
             return $timeout(function () {
               return $q.reject(result);
-            }, delay || 1000);
+            }, delay === undefined ? 1000 : delay);
           });
         }
+
         function downloadWidget(module, html, filetags) {
           try {
             //testing requires instead of only module just so we can control if this happens in tests
             if (angular.module(module).requires.length) {
-              return delayedPromise($http.get(html, { cache: $templateCache }).then(function (response) {
+              return $http.get(html, {cache: $templateCache}).then(function (response) {
                 return response.data;
-              }));
+              });
             }
           } catch (e) {
+
           }
+
           var promises = filetags.map(function (filename) {
-              return tagAppender(filename, filename.split('.').reverse()[0]);
-            });
-          promises.unshift($http.get(html, { cache: $templateCache }));
-          return delayedPromise($q.all(promises).then(function (result) {
+            return tagAppender(filename, filename.split('.').reverse()[0]);
+          });
+          promises.unshift($http.get(html, {cache: $templateCache}));
+          return $q.all(promises).then(function (result) {
             return result[0].data;
-          }));
+          });
         }
+
         function handleNewInjector() {
           var widgetConfig = injector.get('widgetConfig');
-          var properties = widgetConfig.exportProperties();
-          scope.$emit('exportPropertiesUpdated', properties);
-          widgetConfig.exportProperties = function (props) {
-            return scope.$apply(function () {
-              angular.extend(properties, props);
-              scope.$emit('exportPropertiesUpdated', properties);
-              return properties;
+          var widgetScope = injector.get('$rootScope');
+
+          widgets.getEventsToForward().forEach(function (name) {
+            $rootScope.$on(name, function (event) {
+              var args = Array.prototype.slice.call(arguments);
+              args[0] = name;
+              if (widgetScope.$broadcast.apply(widgetScope, args).defaultPrevented) {
+                event.preventDefault();
+              }
             });
-          };
-          widgetConfig.reportError = function () {
-            scope.$apply(function () {
-              scope.$emit('widgetError');
-            });
-          };
+          });
+
           scope.$watch('options', function (options) {
-            injector.get('$rootScope').$apply(function () {
+            widgetScope.$apply(function () {
               widgetConfig.setOptions(options);
             });
           }, true);
+
+          var properties = widgetConfig.exportProperties();
           if (!properties.loading) {
             scope.$emit('widgetLoaded');
           } else {
             var deregister = scope.$on('exportPropertiesUpdated', function (event, properties) {
-                if (!properties.loading) {
-                  deregister();
-                  scope.$emit('widgetLoaded');
-                }
-              });
+              if (!properties.loading) {
+                deregister();
+                scope.$emit('widgetLoaded');
+              }
+            });
           }
+
           widgets.registerWidget(injector);
         }
-        function bootstrapWidget(src) {
+
+        function bootstrapWidget(src, delay) {
           var thisChangeId = ++changeCounter;
           var manifest = widgets.getWidgetManifest(src);
-          downloadWidget(manifest.module, manifest.html, manifest.files).then(function (response) {
-            if (thisChangeId !== changeCounter) {
-              return;
-            }
-            try {
-              var widgetElement = angular.element(response);
-              var requires = angular.module(manifest.module).requires;
-              if (requires.indexOf('angularWidget') === -1) {
-                requires.push('angularWidget');
+
+          delayedPromise(downloadWidget(manifest.module, manifest.html, manifest.files), delay)
+            .then(function (response) {
+              if (thisChangeId !== changeCounter) {
+                return;
               }
-              injector = angular.bootstrap(widgetElement, [manifest.module]);
-              handleNewInjector();
-              element.append(widgetElement);
-            } catch (e) {
-              scope.$emit('widgetError');
-            }
-          }, function () {
-            if (thisChangeId === changeCounter) {
-              scope.$emit('widgetError');
-            }
-          });
+              try {
+                var widgetElement = angular.element(response);
+                var modules = [
+                  'angularWidgetOnly',
+                  'angularWidget',
+                  widgetConfigSection,
+                  manifest.module
+                ].concat(manifest.config || []);
+
+                scope.$emit('widgetLoading');
+                injector = angular.bootstrap(widgetElement, modules);
+                handleNewInjector();
+                element.append(widgetElement);
+              } catch (e) {
+                $log.error(e);
+                scope.$emit('widgetError');
+              }
+            }, function () {
+              if (thisChangeId === changeCounter) {
+                scope.$emit('widgetError');
+              }
+            });
         }
+
         function unregisterInjector() {
           if (injector) {
             widgets.unregisterWidget(injector);
             injector = null;
           }
         }
+
         function updateWidgetSrc() {
           unregisterInjector();
           element.html('');
           if (scope.src) {
-            bootstrapWidget(scope.src);
+            bootstrapWidget(scope.src, scope.delay);
           }
         }
+
         scope.$watch('src', updateWidgetSrc);
         scope.$on('reloadWidget', updateWidgetSrc);
         scope.$on('$destroy', function () {
@@ -130,26 +213,25 @@ angular.module('angularWidget').directive('ngWidget', [
         });
       }
     };
-  }
-]);
+  }]);
+
 /* global navigator, document */
 'use strict';
-angular.module('angularWidget').value('headElement', document.getElementsByTagName('head')[0]).value('navigator', navigator).factory('tagAppender', [
-  '$q',
-  '$rootScope',
-  'headElement',
-  '$interval',
-  'navigator',
-  '$document',
-  function ($q, $rootScope, headElement, $interval, navigator, $document) {
+
+angular.module('angularWidgetInternal')
+  .value('headElement', document.getElementsByTagName('head')[0])
+  .value('navigator', navigator)
+  .factory('tagAppender', ["$q", "$rootScope", "headElement", "$interval", "navigator", "$document", function ($q, $rootScope, headElement, $interval, navigator, $document) {
     var requireCache = [];
     var styleSheets = $document[0].styleSheets;
+
     return function (url, filetype) {
       var deferred = $q.defer();
       if (requireCache.indexOf(url) !== -1) {
         deferred.resolve();
         return deferred.promise;
       }
+
       var fileref;
       if (filetype === 'css') {
         fileref = angular.element('<link></link>')[0];
@@ -161,6 +243,7 @@ angular.module('angularWidget').value('headElement', document.getElementsByTagNa
         fileref.setAttribute('type', 'text/javascript');
         fileref.setAttribute('src', url);
       }
+
       var done = false;
       headElement.appendChild(fileref);
       fileref.onerror = function () {
@@ -178,6 +261,7 @@ angular.module('angularWidget').value('headElement', document.getElementsByTagNa
           done = true;
           fileref.onload = fileref.onreadystatechange = null;
           requireCache.push(url);
+
           //the $$phase test is required due to $interval mock, should be removed when $interval is fixed
           if ($rootScope.$$phase) {
             deferred.resolve();
@@ -191,79 +275,181 @@ angular.module('angularWidget').value('headElement', document.getElementsByTagNa
       if (filetype === 'css' && navigator.userAgent.match(' Safari/') && !navigator.userAgent.match(' Chrom') && navigator.userAgent.match(' Version/5.')) {
         var attempts = 20;
         var promise = $interval(function checkStylesheetAttempt() {
-            for (var i = 0; i < styleSheets.length; i++) {
-              if (styleSheets[i].href === url) {
-                $interval.cancel(promise);
-                fileref.onload();
-                return;
-              }
-            }
-            if (--attempts === 0) {
+          for (var i = 0; i < styleSheets.length; i++) {
+            if (styleSheets[i].href === url) {
               $interval.cancel(promise);
-              fileref.onerror();
+              fileref.onload();
+              return;
             }
-          }, 50, 0);  //need to be false in order to not invoke apply... ($interval bug)
+          }
+          if (--attempts === 0) {
+            $interval.cancel(promise);
+            fileref.onerror();
+          }
+        }, 50, 0); //need to be false in order to not invoke apply... ($interval bug)
       }
+
       return deferred.promise;
     };
-  }
-]);
+  }]);
+
 'use strict';
-angular.module('angularWidget').factory('widgetConfig', [
-  '$log',
-  function ($log) {
-    var options = {};
-    var props = {};
-    return {
-      exportProperties: function (obj) {
-        return angular.extend(props, obj || {});
-      },
-      reportError: function () {
-        $log.warn('widget reported an error');
-      },
-      getOptions: function () {
-        return options;
-      },
-      setOptions: function (newOptions) {
-        angular.copy(newOptions, options);
-      }
+
+angular.module('angularWidgetInternal')
+  .provider('widgetConfig', function () {
+    var parentInjectorScope = {
+      $root: {},
+      $apply: function (fn) { fn(); },
+      $emit: angular.noop
     };
-  }
-]);
-'use strict';
-angular.module('angularWidget').provider('widgets', function () {
-  var manifestGenerator;
-  this.setManifestGenerator = function (fn) {
-    manifestGenerator = fn;
-  };
-  this.$get = function () {
-    var widgets = [];
-    return {
-      getWidgetManifest: manifestGenerator,
-      unregisterWidget: function (injector) {
-        var del = [];
-        if (injector) {
-          var i = widgets.indexOf(injector);
-          if (i !== -1) {
-            del = widgets.splice(i, 1);
+
+    this.setParentInjectorScope = function (scope) {
+      parentInjectorScope = scope;
+    };
+
+    function safeApply(fn) {
+      if (parentInjectorScope.$root.$$phase) {
+        fn();
+      } else {
+        parentInjectorScope.$apply(fn);
+      }
+    }
+
+    this.$get = ["$log", function ($log) {
+      var options = {};
+      var properties = {};
+
+      return {
+        exportProperties: function (props) {
+          if (props) {
+            safeApply(function () {
+              angular.extend(properties, props);
+              parentInjectorScope.$emit('exportPropertiesUpdated', properties);
+            });
           }
-        } else {
-          del = widgets;
-          widgets = [];
+          return properties;
+        },
+        reportError: function () {
+          safeApply(function () {
+            if (!parentInjectorScope.$emit('widgetError')) {
+              $log.warn('widget reported an error');
+            }
+          });
+        },
+        getOptions: function () {
+          return options;
+        },
+        setOptions: function (newOptions) {
+          angular.copy(newOptions, options);
         }
-        del.forEach(function (injector) {
-          injector.get('$rootScope').$destroy();
-        });
-      },
-      registerWidget: function (injector) {
-        widgets.push(injector);
-      },
-      notifyWidgets: function (result) {
-        widgets.forEach(function (injector) {
-          injector.get('$rootScope').$digest();
-        });
-        return result;
-      }
+      };
+    }];
+  });
+
+'use strict';
+
+angular.module('angularWidgetInternal')
+  .provider('widgets', function () {
+    var manifestGenerators = [];
+    var eventsToForward = [];
+    var servicesToShare = {};
+
+    this.setManifestGenerator = function (fn) {
+      manifestGenerators.push(fn);
     };
-  };
-});
+
+    this.addEventToForward = function (name) {
+      eventsToForward = eventsToForward.concat(name);
+    };
+
+    this.addServiceToShare = function (name, description) {
+      servicesToShare[name] = description;
+    };
+
+    this.$get = ["$injector", "$rootScope", function ($injector, $rootScope) {
+      var widgets = [];
+      var instancesToShare = {};
+
+      //this will wrap setters so that we can run a digest loop in main app
+      //after some shared service state is changed.
+      function decorate(service, method, count) {
+        var original = service[method];
+        service[method] = function () {
+          if (arguments.length >= count && !$rootScope.$$phase) {
+            $rootScope.$evalAsync();
+          }
+          return original.apply(service, arguments);
+        };
+      }
+
+      angular.forEach(servicesToShare, function (description, name) {
+        var service = $injector.get(name);
+        angular.forEach(description, function (count, method) {
+          decorate(service, method, count);
+        });
+        instancesToShare[name] = service;
+      });
+
+      function notifyInjector(injector, args) {
+        var scope = injector.get('$rootScope');
+        var event;
+        if (args.length) {
+          event = scope.$broadcast.apply(scope, args);
+        }
+        if (!scope.$$phase && injector !== $injector) {
+          scope.$digest();
+        }
+        return event;
+      }
+
+      manifestGenerators = manifestGenerators.map(function (generator) {
+        return $injector.invoke(generator);
+      });
+
+      return {
+        getWidgetManifest: function () {
+          var args = arguments;
+          return manifestGenerators.reduce(function (prev, generator) {
+            var result = generator.apply(this, args);
+            if (result && prev) {
+              //take the manifest with our priority.
+              //if same priority, last generator wins.
+              return prev.priority > result.priority ? prev : result;
+            } else {
+              return result || prev;
+            }
+          }, undefined);
+        },
+        unregisterWidget: function (injector) {
+          var del = [];
+          if (injector) {
+            var i = widgets.indexOf(injector);
+            if (i !== -1) {
+              del = widgets.splice(i, 1);
+            }
+          } else {
+            del = widgets;
+            widgets = [];
+          }
+          del.forEach(function (injector) {
+            injector.get('$rootScope').$destroy();
+          });
+        },
+        registerWidget: function (injector) {
+          widgets.push(injector);
+        },
+        notifyWidgets: function () {
+          var args = arguments;
+          return widgets.map(function (injector) {
+            return notifyInjector(injector, args);
+          });
+        },
+        getEventsToForward: function () {
+          return eventsToForward;
+        },
+        getServicesToShare: function () {
+          return instancesToShare;
+        }
+      };
+    }];
+  });

@@ -1,0 +1,28 @@
+<!doctype html>
+<html ng-app="widgetTestApp">
+  <head>
+    <title>widget2</title>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-widget/angular-widget.js"></script>
+    <link rel="stylesheet" href="styles/widget2.css"/>
+    <script src="scripts/controllers/widget2.js"></script>
+  </head>
+  <body>
+    <ng-widget src="'widget2'"></ng-widget>
+
+    <script>
+      'use strict';
+      angular.module('widgetTestApp', ['angularWidget']).config(function (widgetsProvider) {
+        widgetsProvider.setManifestGenerator(function () {
+          return function () {
+            return {
+              module: 'widget2',
+              html: 'views/widget2.html',
+              files: []
+            };
+          };
+        });
+      });
+    </script>
+  </body>
+</html>
