@@ -12,7 +12,6 @@ angular.module("angularWidgetApp", [ "ngRoute", "angularWidget" ]).config([ "$ro
                     return applicationName;
                 }
             },
-            widgetId: applicationName,
             reloadOnSearch: false
         });
     });

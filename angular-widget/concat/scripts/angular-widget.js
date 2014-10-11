@@ -16,7 +16,7 @@ angular.module('angularWidget', ['angularWidgetInternal'])
         if (name === '$routeChangeSuccess') {
           $injector.invoke(/* @ngInject */["$route", "widgets", "$location", function ($route, widgets, $location) {
             lastId = id;
-            id = $route.current && $route.current.widgetId;
+            id = $route.current && $route.current.locals && $route.current.locals.appName;
             if (id && id === lastId) {
               widgets.notifyWidgets('$locationChangeSuccess', $location.absUrl(), '');
               shouldAbort = true;
@@ -384,9 +384,15 @@ angular.module('angularWidgetInternal')
 
       angular.forEach(servicesToShare, function (description, name) {
         var service = $injector.get(name);
-        angular.forEach(description, function (count, method) {
-          decorate(service, method, count);
-        });
+        if (angular.isArray(description)) {
+          description.forEach(function (method) {
+            decorate(service, method, 0);
+          });
+        } else {
+          angular.forEach(description, function (count, method) {
+            decorate(service, method, count);
+          });
+        }
         instancesToShare[name] = service;
       });
 
