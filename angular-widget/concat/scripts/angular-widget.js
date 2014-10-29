@@ -10,21 +10,41 @@ angular.module('angularWidget', ['angularWidgetInternal'])
     //this is a really ugly trick to prevent reloading of the ng-view in case
     //an internal route changes, effecting only the router inside that view.
     $provide.decorator('$rootScope', ["$delegate", "$injector", function ($delegate, $injector) {
-      var id, lastId, originalBroadcast = $delegate.$broadcast;
+      var next, last, originalBroadcast = $delegate.$broadcast;
+
       $delegate.$broadcast = function (name) {
-        var shouldAbort = false;
+        var shouldMute = false;
         if (name === '$routeChangeSuccess') {
           $injector.invoke(/* @ngInject */["$route", "widgets", "$location", function ($route, widgets, $location) {
-            lastId = id;
-            id = $route.current && $route.current.locals && $route.current.locals.appName;
-            if (id && id === lastId) {
+            last = next;
+            next = $route.current;
+            if (next && last && next.$$route === last.$$route &&
+                next.locals && next.locals.$template &&
+                next.locals.$template.indexOf('<ng-widget') !== -1) {
               widgets.notifyWidgets('$locationChangeSuccess', $location.absUrl(), '');
-              shouldAbort = true;
+              shouldMute = true;
             }
           }]);
         }
-        return shouldAbort ? null : originalBroadcast.apply(this, arguments);
+        if (shouldMute) {
+          arguments[0] = '$routeChangeMuted';
+        }
+        return originalBroadcast.apply(this, arguments);
       };
+
+      //sending $locationChangeSuccess will cause another $routeUpdate
+      //so we need this ugly flag to prevent call stack overflow
+      var suspendListener = false;
+      $delegate.$on('$routeUpdate', function () {
+        if (!suspendListener) {
+          $injector.invoke(/* @ngInject */["widgets", "$location", function (widgets, $location) {
+            suspendListener = true;
+            widgets.notifyWidgets('$locationChangeSuccess', $location.absUrl(), '');
+            suspendListener = false;
+          }]);
+        }
+      });
+
       return $delegate;
     }]);
   }])
@@ -86,6 +106,7 @@ angular.module('angularWidgetInternal')
           });
 
           widgetConfigProvider.setParentInjectorScope(scope);
+          widgetConfigProvider.setOptions(scope.options);
         }
         widgetConfigSection.$inject = ["$provide", "widgetConfigProvider"];
 
@@ -303,8 +324,14 @@ angular.module('angularWidgetInternal')
       $emit: angular.noop
     };
 
+    var options = {};
+
     this.setParentInjectorScope = function (scope) {
       parentInjectorScope = scope;
+    };
+
+    this.setOptions = function (newOptions) {
+      angular.copy(newOptions, options);
     };
 
     function safeApply(fn) {
@@ -316,7 +343,6 @@ angular.module('angularWidgetInternal')
     }
 
     this.$get = ["$log", function ($log) {
-      var options = {};
       var properties = {};
 
       return {
