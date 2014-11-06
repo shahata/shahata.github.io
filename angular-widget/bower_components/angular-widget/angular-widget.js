@@ -7,21 +7,34 @@ angular.module("angularWidget", [ "angularWidgetInternal" ]).config([ "$provide"
         return;
     }
     $provide.decorator("$rootScope", [ "$delegate", "$injector", function($delegate, $injector) {
-        var id, lastId, originalBroadcast = $delegate.$broadcast;
+        var next, last, originalBroadcast = $delegate.$broadcast;
         $delegate.$broadcast = function(name) {
-            var shouldAbort = false;
+            var shouldMute = false;
             if (name === "$routeChangeSuccess") {
                 $injector.invoke([ "$route", "widgets", "$location", function($route, widgets, $location) {
-                    lastId = id;
-                    id = $route.current && $route.current.locals && $route.current.locals.appName;
-                    if (id && id === lastId) {
+                    last = next;
+                    next = $route.current;
+                    if (next && last && next.$$route === last.$$route && next.locals && next.locals.$template && next.locals.$template.indexOf("<ng-widget") !== -1) {
                         widgets.notifyWidgets("$locationChangeSuccess", $location.absUrl(), "");
-                        shouldAbort = true;
+                        shouldMute = true;
                     }
                 } ]);
             }
-            return shouldAbort ? null : originalBroadcast.apply(this, arguments);
+            if (shouldMute) {
+                arguments[0] = "$routeChangeMuted";
+            }
+            return originalBroadcast.apply(this, arguments);
         };
+        var suspendListener = false;
+        $delegate.$on("$routeUpdate", function() {
+            if (!suspendListener) {
+                $injector.invoke([ "widgets", "$location", function(widgets, $location) {
+                    suspendListener = true;
+                    widgets.notifyWidgets("$locationChangeSuccess", $location.absUrl(), "");
+                    suspendListener = false;
+                } ]);
+            }
+        });
         return $delegate;
     } ]);
 } ]).config([ "widgetsProvider", function(widgetsProvider) {
@@ -37,7 +50,10 @@ angular.module("angularWidget", [ "angularWidgetInternal" ]).config([ "$provide"
 
 angular.module("angularWidgetOnly", []).run([ "$rootScope", "$location", function($rootScope, $location) {
     $rootScope.$evalAsync(function() {
-        $rootScope.$broadcast("$locationChangeSuccess", $location.absUrl(), "");
+        var ev = $rootScope.$broadcast("$locationChangeStart", $location.absUrl(), "");
+        if (!ev.defaultPrevented) {
+            $rootScope.$broadcast("$locationChangeSuccess", $location.absUrl(), "");
+        }
     });
 } ]);
 
@@ -60,6 +76,7 @@ angular.module("angularWidgetInternal").directive("ngWidget", [ "$http", "$templ
                     $provide.constant(key, value);
                 });
                 widgetConfigProvider.setParentInjectorScope(scope);
+                widgetConfigProvider.setOptions(scope.options);
             }
             widgetConfigSection.$inject = [ "$provide", "widgetConfigProvider" ];
             function delayedPromise(promise, delay) {
@@ -93,17 +110,24 @@ angular.module("angularWidgetInternal").directive("ngWidget", [ "$http", "$templ
                     return result[0].data;
                 });
             }
+            function forwardEvent(name, src, dst, emit) {
+                var fn = emit ? dst.$emit : dst.$broadcast;
+                src.$on(name, function(event) {
+                    if (!emit || event.stopPropagation) {
+                        var args = Array.prototype.slice.call(arguments);
+                        args[0] = name;
+                        if (fn.apply(dst, args).defaultPrevented) {
+                            event.preventDefault();
+                        }
+                    }
+                });
+            }
             function handleNewInjector() {
                 var widgetConfig = injector.get("widgetConfig");
                 var widgetScope = injector.get("$rootScope");
                 widgets.getEventsToForward().forEach(function(name) {
-                    $rootScope.$on(name, function(event) {
-                        var args = Array.prototype.slice.call(arguments);
-                        args[0] = name;
-                        if (widgetScope.$broadcast.apply(widgetScope, args).defaultPrevented) {
-                            event.preventDefault();
-                        }
-                    });
+                    forwardEvent(name, $rootScope, widgetScope, false);
+                    forwardEvent(name, widgetScope, scope, true);
                 });
                 scope.$watch("options", function(options) {
                     widgetScope.$apply(function() {
@@ -247,8 +271,12 @@ angular.module("angularWidgetInternal").provider("widgetConfig", function() {
         },
         $emit: angular.noop
     };
+    var options = {};
     this.setParentInjectorScope = function(scope) {
         parentInjectorScope = scope;
+    };
+    this.setOptions = function(newOptions) {
+        angular.copy(newOptions, options);
     };
     function safeApply(fn) {
         if (parentInjectorScope.$root.$$phase) {
@@ -258,7 +286,6 @@ angular.module("angularWidgetInternal").provider("widgetConfig", function() {
         }
     }
     this.$get = [ "$log", function($log) {
-        var options = {};
         var properties = {};
         return {
             exportProperties: function(props) {

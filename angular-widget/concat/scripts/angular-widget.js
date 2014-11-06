@@ -58,7 +58,7 @@ angular.module('angularWidget', ['angularWidgetInternal'])
       //a digest loop in the main app when some widget sets the location.
       url: 1,
       path: 1,
-      search: 2,
+      search: 1,
       hash: 1,
       $$parse: 1
     });
@@ -75,7 +75,10 @@ angular.module('angularWidgetOnly', [])
     //ourselves to kickoff ng-rounte and ui-router ($location usually does that
     //itself during instantiation)
     $rootScope.$evalAsync(function () {
-      $rootScope.$broadcast('$locationChangeSuccess', $location.absUrl(), '');
+      var ev = $rootScope.$broadcast('$locationChangeStart', $location.absUrl(), '');
+      if (!ev.defaultPrevented) {
+        $rootScope.$broadcast('$locationChangeSuccess', $location.absUrl(), '');
+      }
     });
   }]);
 
@@ -94,7 +97,7 @@ angular.module('angularWidgetInternal')
         delay: '@'
       },
       link: function (scope, element) {
-        var changeCounter = 0, injector;
+        var changeCounter = 0, injector, unsubscribe;
 
         /* @ngInject */
         function widgetConfigSection($provide, widgetConfigProvider) {
@@ -143,25 +146,34 @@ angular.module('angularWidgetInternal')
           });
         }
 
+        function forwardEvent(name, src, dst, emit) {
+          var fn = emit ? dst.$emit : dst.$broadcast;
+          return src.$on(name, function (event) {
+            if (!emit || event.stopPropagation) {
+              var args = Array.prototype.slice.call(arguments);
+              args[0] = name;
+              if (fn.apply(dst, args).defaultPrevented) {
+                event.preventDefault();
+              }
+            }
+          });
+        }
+
         function handleNewInjector() {
           var widgetConfig = injector.get('widgetConfig');
           var widgetScope = injector.get('$rootScope');
+          unsubscribe = [];
 
           widgets.getEventsToForward().forEach(function (name) {
-            $rootScope.$on(name, function (event) {
-              var args = Array.prototype.slice.call(arguments);
-              args[0] = name;
-              if (widgetScope.$broadcast.apply(widgetScope, args).defaultPrevented) {
-                event.preventDefault();
-              }
-            });
+            unsubscribe.push(forwardEvent(name, $rootScope, widgetScope, false));
+            unsubscribe.push(forwardEvent(name, widgetScope, scope, true));
           });
 
-          scope.$watch('options', function (options) {
+          unsubscribe.push(scope.$watch('options', function (options) {
             widgetScope.$apply(function () {
               widgetConfig.setOptions(options);
             });
-          }, true);
+          }, true));
 
           var properties = widgetConfig.exportProperties();
           if (!properties.loading) {
@@ -173,6 +185,7 @@ angular.module('angularWidgetInternal')
                 scope.$emit('widgetLoaded');
               }
             });
+            unsubscribe.push(deregister);
           }
 
           widgets.registerWidget(injector);
@@ -213,6 +226,9 @@ angular.module('angularWidgetInternal')
 
         function unregisterInjector() {
           if (injector) {
+            unsubscribe.forEach(function (fn) {
+              fn();
+            });
             widgets.unregisterWidget(injector);
             injector = null;
           }
@@ -332,6 +348,10 @@ angular.module('angularWidgetInternal')
 
     this.setOptions = function (newOptions) {
       angular.copy(newOptions, options);
+    };
+
+    this.getOptions = function () {
+      return options;
     };
 
     function safeApply(fn) {

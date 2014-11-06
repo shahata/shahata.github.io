@@ -41,7 +41,7 @@ angular.module("angularWidget", [ "angularWidgetInternal" ]).config([ "$provide"
     widgetsProvider.addServiceToShare("$location", {
         url: 1,
         path: 1,
-        search: 2,
+        search: 1,
         hash: 1,
         $$parse: 1
     });
@@ -50,7 +50,10 @@ angular.module("angularWidget", [ "angularWidgetInternal" ]).config([ "$provide"
 
 angular.module("angularWidgetOnly", []).run([ "$rootScope", "$location", function($rootScope, $location) {
     $rootScope.$evalAsync(function() {
-        $rootScope.$broadcast("$locationChangeSuccess", $location.absUrl(), "");
+        var ev = $rootScope.$broadcast("$locationChangeStart", $location.absUrl(), "");
+        if (!ev.defaultPrevented) {
+            $rootScope.$broadcast("$locationChangeSuccess", $location.absUrl(), "");
+        }
     });
 } ]);
 
@@ -67,7 +70,7 @@ angular.module("angularWidgetInternal").directive("ngWidget", [ "$http", "$templ
             delay: "@"
         },
         link: function(scope, element) {
-            var changeCounter = 0, injector;
+            var changeCounter = 0, injector, unsubscribe;
             function widgetConfigSection($provide, widgetConfigProvider) {
                 angular.forEach(widgets.getServicesToShare(), function(value, key) {
                     $provide.constant(key, value);
@@ -107,23 +110,31 @@ angular.module("angularWidgetInternal").directive("ngWidget", [ "$http", "$templ
                     return result[0].data;
                 });
             }
+            function forwardEvent(name, src, dst, emit) {
+                var fn = emit ? dst.$emit : dst.$broadcast;
+                return src.$on(name, function(event) {
+                    if (!emit || event.stopPropagation) {
+                        var args = Array.prototype.slice.call(arguments);
+                        args[0] = name;
+                        if (fn.apply(dst, args).defaultPrevented) {
+                            event.preventDefault();
+                        }
+                    }
+                });
+            }
             function handleNewInjector() {
                 var widgetConfig = injector.get("widgetConfig");
                 var widgetScope = injector.get("$rootScope");
+                unsubscribe = [];
                 widgets.getEventsToForward().forEach(function(name) {
-                    $rootScope.$on(name, function(event) {
-                        var args = Array.prototype.slice.call(arguments);
-                        args[0] = name;
-                        if (widgetScope.$broadcast.apply(widgetScope, args).defaultPrevented) {
-                            event.preventDefault();
-                        }
-                    });
+                    unsubscribe.push(forwardEvent(name, $rootScope, widgetScope, false));
+                    unsubscribe.push(forwardEvent(name, widgetScope, scope, true));
                 });
-                scope.$watch("options", function(options) {
+                unsubscribe.push(scope.$watch("options", function(options) {
                     widgetScope.$apply(function() {
                         widgetConfig.setOptions(options);
                     });
-                }, true);
+                }, true));
                 var properties = widgetConfig.exportProperties();
                 if (!properties.loading) {
                     scope.$emit("widgetLoaded");
@@ -134,6 +145,7 @@ angular.module("angularWidgetInternal").directive("ngWidget", [ "$http", "$templ
                             scope.$emit("widgetLoaded");
                         }
                     });
+                    unsubscribe.push(deregister);
                 }
                 widgets.registerWidget(injector);
             }
@@ -163,6 +175,9 @@ angular.module("angularWidgetInternal").directive("ngWidget", [ "$http", "$templ
             }
             function unregisterInjector() {
                 if (injector) {
+                    unsubscribe.forEach(function(fn) {
+                        fn();
+                    });
                     widgets.unregisterWidget(injector);
                     injector = null;
                 }
@@ -267,6 +282,9 @@ angular.module("angularWidgetInternal").provider("widgetConfig", function() {
     };
     this.setOptions = function(newOptions) {
         angular.copy(newOptions, options);
+    };
+    this.getOptions = function() {
+        return options;
     };
     function safeApply(fn) {
         if (parentInjectorScope.$root.$$phase) {
