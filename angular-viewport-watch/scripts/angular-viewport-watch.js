@@ -11,9 +11,15 @@
         }
         return {
             restrict: "AE",
-            link: function(scope, element, attrs) {
-                var elementWatcher = scrollMonitor.create(element, scope.$eval(attrs.viewportWatch || "0"));
-                function toggleDigest(scope, enable) {
+            link: function(scope, element, attr) {
+                var elementWatcher = scrollMonitor.create(element, scope.$eval(attr.viewportWatch || "0"));
+                function watchDuringDisable() {
+                    this.$$watchersBackup = this.$$watchersBackup || [];
+                    this.$$watchers = this.$$watchersBackup;
+                    this.constructor.prototype.$watch.apply(this, arguments);
+                    this.$$watchers = null;
+                }
+                function toggleWatchers(scope, enable) {
                     var digest, current, next = scope;
                     do {
                         current = next;
@@ -21,12 +27,14 @@
                             if (current.hasOwnProperty("$$watchersBackup")) {
                                 current.$$watchers = current.$$watchersBackup;
                                 delete current.$$watchersBackup;
-                                digest = true;
+                                delete current.$watch;
+                                digest = !scope.$root.$$phase;
                             }
                         } else {
                             if (!current.hasOwnProperty("$$watchersBackup")) {
                                 current.$$watchersBackup = current.$$watchers;
                                 current.$$watchers = null;
+                                current.$watch = watchDuringDisable;
                             }
                         }
                         next = current.$$childHead;
@@ -42,17 +50,20 @@
                         scope.$digest();
                     }
                 }
+                function disableDigest() {
+                    toggleWatchers(scope, false);
+                }
+                function enableDigest() {
+                    toggleWatchers(scope, true);
+                }
                 if (!elementWatcher.isInViewport) {
-                    scope.$evalAsync(function() {
-                        toggleDigest(scope, false);
-                    });
+                    scope.$evalAsync(disableDigest);
                     debouncedViewportUpdate();
                 }
-                elementWatcher.enterViewport(function() {
-                    toggleDigest(scope, true);
-                });
-                elementWatcher.exitViewport(function() {
-                    toggleDigest(scope, false);
+                elementWatcher.enterViewport(enableDigest);
+                elementWatcher.exitViewport(disableDigest);
+                scope.$on("toggleWatchers", function(event, enable) {
+                    toggleWatchers(scope, enable);
                 });
                 scope.$on("$destroy", function() {
                     elementWatcher.destroy();
