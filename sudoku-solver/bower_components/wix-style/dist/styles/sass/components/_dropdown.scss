@@ -1,0 +1,107 @@
+// Input Class Generator
+@include wrapClassesInsideProjectClassIfExists() {
+  @if ($enable-dropdown and $enable-wix-style-css) {
+
+    $dropdown-regular-vertical-padding: 7px;
+    $dropdown-large-vertical-padding: 12px;
+    $dropdown-radius: 6px;
+    $dropdown-background: lighten($wix-color-primary, 42%);
+    $dropdown-border-color:lighten($wix-color-primary, 30%);
+
+    %dropdown-base {
+      width: 300px;
+      background: $dropdown-background;
+       > div {
+         border: 1px solid $dropdown-border-color;
+         border-radius: $dropdown-radius;
+         font-size: $wix-font-size-normal;
+         padding: $dropdown-regular-vertical-padding 31px $dropdown-regular-vertical-padding 17px;
+         box-shadow: 0px 1px 0px transparentize($dropdown-border-color, 0.33);
+         @extend .wix-svg-font-icons;
+         @extend .wix-svg-font-icons-arrow-down;
+         display: block; //overrides display:inline-block of .wix-svg-font-icons class
+         position: relative;
+         cursor: pointer;
+         color: $wix-black;
+         white-space: nowrap;
+         overflow: hidden;
+         text-overflow: ellipsis;
+         &::before {
+           color: $wix-color-primary;
+           position: absolute;
+           right: 0;
+           font-size: 7px;
+           top: 2px;
+           background: $dropdown-background;
+           padding: $dropdown-regular-vertical-padding+3 11px $dropdown-regular-vertical-padding+2;
+           border-radius: $dropdown-radius;
+         }
+       }
+
+       > ul {
+         margin: 0;
+         display: none;
+         position: absolute;
+         background: inherit;
+         width: inherit;
+         box-sizing: border-box;
+         border: 1px solid $dropdown-border-color;
+         border-top: none;
+         border-radius: 0 0 $dropdown-radius $dropdown-radius;
+         z-index: 1; //still need to verify through practice that 1 is the right value
+         > li {
+           padding: 11px 17px 10px;
+           list-style-type: none;
+           &:last-child {
+             border-radius: 0 0 $dropdown-radius $dropdown-radius;
+           }
+           &:hover {
+             color: $wix-white;
+             background: $wix-color-primary;
+             cursor: pointer;
+             a {
+               text-decoration: none !important;
+             }
+           }
+         }
+       }
+
+
+      &:hover:not(.dropdown-no-hover), &.dropdown-open {
+        > div {
+          box-shadow: none;
+          color: $wix-color-primary;
+          border-radius: $dropdown-radius $dropdown-radius 0 0;
+        }
+        > ul {
+          display: block;
+        }
+      }
+
+      &.dropdown-error {
+        > div, &:hover > div {
+          box-shadow: 0px 1px 0px $wix-color-error;
+          border-color: $wix-color-error;
+          color: $wix-color-error;
+          &::before {
+            color: $wix-color-error;
+          }
+        }
+      }
+
+      &.dropdown-large {
+        > div {
+          padding: $dropdown-large-vertical-padding 17px;
+          &::before {
+            padding: $dropdown-large-vertical-padding+3 11px $dropdown-large-vertical-padding+2;
+          }
+        }
+      }
+    }
+
+    .dropdown {
+      @extend %dropdown-base;
+    }
+  }
+}
+

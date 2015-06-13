@@ -1,0 +1,229 @@
+// Button Variables
+
+$button-border-radius: 6px;
+$button-small-horizonal-padding: 9px;
+$button-medium-horizonal-padding: 11px;
+$button-large-horizonal-padding: 22px;
+$button-vertical-padding: 20px;
+
+$button-height-small: 27px;
+$button-height-medium: 32px;
+$button-height-large: 40px;
+
+// Button Mixins
+
+@mixin set-button-height($height, $button-type) {
+
+  @if ($button-type != 'button-default') {
+    $height: $height - 2;
+  }
+  height: $height;
+}
+
+@mixin button-line-height-manager() {
+  line-height: $button-height-medium - 1;
+  &.btn-large {
+    line-height: $button-height-large - 1;
+  }
+  &.btn-small {
+    line-height: $button-height-small - 1;
+  }
+}
+
+@mixin button-height-manager($button-type) {
+  @include set-button-height($button-height-medium, $button-type);
+
+  &.btn-small {
+    @include set-button-height($button-height-small, $button-type);
+  }
+
+  &.btn-large {
+    @include set-button-height($button-height-large, $button-type);
+  }
+}
+
+@mixin button-border-manager($color, $button-type) {
+  @if ($button-type != 'button-default') {
+    border: none;
+  } @else {
+    border: 1px solid $color;
+  }
+}
+
+@mixin button-color-manager($color, $button-type) {
+  @if ($button-type == 'button-primary') {
+    color: $wix-white;
+  } @else {
+    color: $color;
+  }
+  &:hover {
+    &:not([disabled="disabled"]):not(.disabled) {
+      color: $wix-white;
+    }
+    &.disabled, &[disabled="disabled"] {
+      @if ($button-type == 'button-primary') {
+        color: $wix-white;
+      } @else {
+        color: $color;
+      }
+    }
+  }
+
+  &:active:not([disabled="disabled"]):not(.disabled) {
+    @if ($button-type != 'button-primary') {
+      color: $wix-white;
+    } @else {
+      color: transparentize($wix-white, 0.15);
+    }
+  }
+}
+
+@mixin button-background-manager($color, $button-type) {
+  @if ($button-type == 'button-primary') {
+    background: $color;
+
+  } @else {
+    background: $wix-white;
+  }
+
+  &:hover:not([disabled="disabled"]):not(.disabled) {
+    @if ($button-type == 'button-default') {
+      background: $color;
+    } @else {
+      background: lighten($color, 3%);
+    }
+  }
+  &:active:not([disabled="disabled"]):not(.disabled) {
+    background: darken($color, 7%);
+  }
+
+}
+
+@mixin button-box-shadow-manager($color, $button-type) {
+  $box-shadow-full: 0 2px 0 0 darken($color, 7%);
+  @if ($button-type == 'button-primary') {
+    box-shadow: $box-shadow-full;
+  } @elseif ($button-type == 'button-default-borderless') {
+    box-shadow: 0 2px 0 0 desaturate(lighten($color, 32%), 50%);
+    &:hover:not([disabled="disabled"]):not(.disabled) {
+      box-shadow: $box-shadow-full;
+    }
+  }
+
+  &:active:not([disabled="disabled"]):not(.disabled) {
+    @if ($button-type != 'button-default') {
+      box-shadow: 0 -2px 0 0 darken($color, 12%);
+    }
+  }
+}
+
+@mixin button-translate-manager($button-type) {
+
+  @if ($button-type != 'button-default') {
+    transform: translateY(-1px);
+    &:active:not([disabled="disabled"]):not(.disabled) {
+      transform: translateY(1px);
+    }
+  }
+}
+
+@mixin button-typography-manager($button-type) {
+  font-size: $wix-font-size-normal;
+  &.btn-small {
+    font-size: $wix-font-size-small;
+  }
+}
+
+@mixin button-property-generator($color, $button-type: 'button-default') {
+
+  @include button-color-manager($color, $button-type);
+  @include button-border-manager($color, $button-type);
+  @include button-height-manager($button-type);
+  @include button-background-manager($color, $button-type);
+  @include button-box-shadow-manager($color, $button-type);
+  @include button-translate-manager($button-type);
+  @include button-typography-manager($button-type);
+  @include button-line-height-manager();
+
+}
+
+
+// Button Class Generator
+@include wrapClassesInsideProjectClassIfExists() {
+  @if ($enable-buttons and $enable-wix-style-css) {
+
+    $animation-details: .07s linear;
+
+    %button-base {
+      font-family: $wix-helvetica-55;
+      text-decoration: none;
+      font-size: $wix-font-size-small;
+      cursor: pointer;
+      border-radius: $button-border-radius;
+      padding: 0 $button-vertical-padding;
+      box-sizing: border-box;
+      &:not(.btn-default) {
+        transition: box-shadow $animation-details, transform $animation-details, background $animation-details;
+      }
+
+      &:hover {
+        text-decoration: none !important;
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &[disabled="disabled"], &.disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+    }
+
+    a%button-base {
+      display: inline-block;
+      @include button-line-height-manager();
+    }
+
+
+    /* Default Buttons */
+    .btn-default {
+      @extend %button-base;
+      @include button-property-generator($wix-color-primary);
+    }
+
+    .btn-default-premium {
+      @extend %button-base;
+      @include button-property-generator($wix-color-premium);
+    }
+
+    /* Borderless Buttons */
+    .btn-borderless {
+      @extend %button-base;
+      @include button-property-generator($wix-color-primary, 'button-default-borderless');
+    }
+
+    /* Primary Buttons */
+
+    .btn-primary {
+      @extend %button-base;
+      @include button-property-generator($wix-color-primary, 'button-primary');
+    }
+
+    .btn-primary-premium {
+      @extend %button-base;
+      @include button-property-generator($wix-color-premium, 'button-primary');
+    }
+
+    .btn-primary-market {
+      @extend %button-base;
+      @include button-property-generator($wix-color-market, 'button-primary');
+    }
+
+    .btn-primary-warn {
+      @extend %button-base;
+      @include button-property-generator($wix-color-warn, 'button-primary');
+    }
+  }
+}

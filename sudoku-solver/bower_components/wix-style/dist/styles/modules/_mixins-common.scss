@@ -1,0 +1,60 @@
+////
+// Sets a value for a property only if value exists.
+// @param $property - the css property to be set
+// @param $value - a values for the property to be set to
+// @param $empty-value - (optional, default nil) definition for "empty value"
+//
+@mixin set-if-exists($property, $value, $empty-value: nil) {
+	@if ($value != $empty-value) {
+		#{$property}: $value;
+	}
+}
+
+////
+// Sets default values for pseudo elements (:before and :after).
+// @param $width - (optional, default: nil) width to be set
+// @param $height - (optional, default: width value) height to be set
+// @param $content - (optional, default: "") the content to be put inside the pseudo element
+//
+@mixin pseudo-element($width: nil, $height: $width, $content: "") {
+	@include dimensions($width, $height);
+	@include set-if-exists(content, $content);
+	display: inline-block;
+}
+
+////
+// Style the placeholder of an input.
+// This should be used as "content directive", @see http://goo.gl/Lr0nXo
+//
+@mixin placeholder() {
+	&::-webkit-input-placeholder	{ @content }
+	&:-moz-placeholder				{ @content }
+	&::-moz-placeholder				{ @content }
+	&:-ms-input-placeholder			{ @content }
+}
+
+////
+// Used to add an icon to an element without applying css class on it.
+// It should be used to include an icon in a pseudo element.
+// @param $icon-family - name of icons family, e.g. "glyphicons"
+// @param $icon-name - name of the icon without the family name prefix. E.g., for "glyphicons-arrow-down" use "arrow-down"
+//
+@mixin get-svg-font-icon($font-name, $icon-name) {
+	@extend .#{$font-name};
+	@extend .#{$icon-name}:before;
+	@include pseudo-element($content: nil);
+}
+
+////
+// This allows the user to define a selector in which all css classes will be wrapped in.
+// Once This selector is defined all of the classes will be wrapped and will not contaminate the scope
+////
+@mixin wrapClassesInsideProjectClassIfExists() {
+  @if ($wix-style-project-wrapper-selector != nil) {
+    #{$wix-style-project-wrapper-selector} {
+      @content
+    }
+  } @else {
+    @content
+  }
+}

@@ -1,0 +1,37 @@
+@if ($enable-common and $enable-wix-style-css) {
+  @include wrapClassesInsideProjectClassIfExists() {
+    body {
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    %unstyled-list {
+      @include spacing-reset();
+      list-style: none;
+    }
+
+    @each $side in (right left) {
+      .pull-#{$side} {
+        float: $side;
+      }
+    }
+
+    .clearfix {
+      @include clearfix();
+    }
+
+    .is-crossed {
+      text-decoration: line-through;
+    }
+
+    [ng\:cloak],
+    [ng-cloak],
+    [data-ng-cloak],
+    [x-ng-cloak],
+    .ng-cloak,
+    .x-ng-cloak
+    .ng-hide {
+      display: none !important;
+    }
+  }
+}

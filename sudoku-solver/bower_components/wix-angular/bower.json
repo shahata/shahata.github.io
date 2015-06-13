@@ -1,0 +1,39 @@
+{
+  "name": "wix-angular",
+  "version": "0.1.65",
+  "main": "dist/scripts/wix-angular.js",
+  "ignore": [
+    ".*",
+    "Gemfile*",
+    "Gruntfile.js",
+    "pom.xml",
+    "*.json",
+    "*.conf.js",
+    "*-conf.js",
+    "app/*",
+    "!app/styles",
+    "test/*",
+    "!test/lib",
+    "dist/bower_components/*",
+    "!dist/bower_components/angular",
+    "!dist/bower_components/cross-storage",
+    "dist/concat",
+    "dist/_debug*",
+    "maven",
+    "*.sublime*"
+  ],
+  "dependencies": {
+    "angular": "~1.2.0",
+    "uri.js": "~1.13.1",
+    "angular-translate": "~1.1.0",
+    "cross-storage": "~0.6.0"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.2.0",
+    "angular-scenario": "~1.2.0",
+    "es5-shim": "~2.1.0"
+  },
+  "resolutions": {
+    "angular": "~1.2.0"
+  }
+}

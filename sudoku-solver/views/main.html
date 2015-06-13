@@ -1,0 +1,16 @@
+<div class='main' ng-controller='MainController as main'>
+  <button ng-click='main.solve(true)'>solve!</button>
+  <input id='showPossibilities' ng-model='main.showPossibilities' type='checkbox'>
+  <label for='showPossibilities'>show possibilities</label>
+  <input id='showCode' ng-model='main.showCode' type='checkbox'>
+  <label for='showPossibilities'>show code</label>
+  <table>
+    <tr ng-init='rowScope = this' ng-repeat='row in main.cells'>
+      <td ng-repeat='cell in row' style='{{main.getStyle(rowScope.$index, $index)}}'>
+        <input ng-model='cell.value' style='width: 30px' type='number'>
+        {{main.showPossibilities ? cell.possibilities : ''}}
+      </td>
+    </tr>
+  </table>
+  <pre>{{main.showCode ? main.code : ''}}</pre>
+</div>

@@ -1,0 +1,49 @@
+@import "colors";
+@import "typography";
+@import "tpa";
+
+// ======================================================================
+// =| Common Variables |=================================================
+// ======================================================================
+
+$size-factor: 10px !default;
+
+// A state of element (hover, active, disabled, focused and etc)
+// ----------------------------------------------------------------------
+$state-factor: 5% !default;
+
+
+// ======================================================================
+// =| Core |=============================================================
+// ======================================================================
+$enable-skin: true !default;
+$skin-color: $wix-black !default;
+$skin-background: $wix-white;
+$skin-font-family: $wix-helvetica-55 !default;
+$skin-font-size: $wix-font-size-normal !default;
+$skin-link-color: $wix-color-highlight !default;
+$skin-link-color_hover: lighten($skin-link-color, $state-factor) !default;
+$enable-wix-style-css: true !default;
+
+// ======================================================================
+// =| Component Configuration |==========================================
+// ======================================================================
+$enable-common: true !default;
+$wix-style-project-wrapper-selector: nil !default;
+
+// SVG Icon font
+// ----------------------------------------------------------------------
+$wix-svg-font-icon-family: "wix-svg-font-icons";
+$enable-svg-font: true !default;
+
+// Buttons
+// ----------------------------------------------------------------------
+$enable-buttons: true !default;
+
+// Inputs
+// ----------------------------------------------------------------------
+$enable-inputs: true !default;
+
+// Dropdown
+// ----------------------------------------------------------------------
+$enable-dropdown: true !default;

@@ -1,0 +1,41 @@
+@mixin sprite-position-retina($spriteUrl, $name, $ratio) {
+  $spriteData: sprite-position($spriteUrl, $name);
+  $x: nth($spriteData,1)/$ratio;
+  $y: nth($spriteData,2)/$ratio;
+  background-position: $x $y;
+}
+
+@mixin is-pixel-ratio($ratio) {
+  $min-ratio: $ratio - 0.9;
+  @media (min--moz-device-pixel-ratio: $min-ratio),
+  (-webkit-min-device-pixel-ratio: $min-ratio),
+  (min-device-pixel-ratio: $min-ratio),
+  (min-resolution: #{$min-ratio}dppx) {
+    @content;
+  }
+}
+
+@mixin generate-icon-data($icons, $name, $ratio) {
+  background: $icons no-repeat;
+  height: image-height(sprite-file($icons, $name))/$ratio;
+  width: image-width(sprite-file($icons, $name))/$ratio;
+  @include sprite-position-retina($icons, $name, $ratio);
+  background-size: image-width(sprite-path($icons))/$ratio image-height(sprite-path($icons))/$ratio;
+}
+
+@mixin dynamic-sprite($name, $icons-1x, $icons-2x, $icons-3x, $retina: true) {
+  background: $icons-1x no-repeat;
+  background-position: sprite-position($icons-1x, $name);
+  height: image-height(sprite-file($icons-1x, $name));
+  width: image-width(sprite-file($icons-1x, $name));
+  @if $retina {
+    @include is-pixel-ratio(2) {
+      @include generate-icon-data($icons-2x, $name, 2)
+    };
+
+    @include is-pixel-ratio(3) {
+      @include generate-icon-data($icons-3x, $name, 3)
+    };
+
+  }
+}

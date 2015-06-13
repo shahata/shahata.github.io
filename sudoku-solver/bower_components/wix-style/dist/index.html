@@ -1,0 +1,266 @@
+<!doctype html>
+<!--[if IE 9]>         <html class="lte-ie9"> <![endif]-->
+<!--[if gt IE 9]><!--> <html> <!--<![endif]-->
+<head>
+	<title>wix style</title>
+    <link rel="stylesheet" href="http://static.pizza.wixpress.com/services/third-party/fonts/Helvetica/fontFace.css">
+    <meta charset="utf-8">
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width">
+	<meta name="robots" content="noindex, nofollow">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+
+
+    <!-- #if( !${debug} ) -->
+<link rel="stylesheet" href="styles/style.min.css">
+<!-- #else -#if( false )#end->
+<link rel="stylesheet" href="_debug_styles/style.css"><!-- #end -->
+
+    <!-- #if( !${debug} ) -->
+<link rel="stylesheet" href="styles/preview.css">
+<!-- #else -#if( false )#end->
+<link rel="stylesheet" href="_debug_styles/preview.css"><!-- #end -->
+    <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script>
+        $(function () {
+            $('#night-button').click(function () {
+                $('#night-button').unbind('click');
+                $('#night-button').addClass('disabled').text('OMG You\'ve activated the dark code! There\'s no turning back!');
+                setInterval(function () {
+                    $('body').toggleClass('night');
+                }, 1000);
+                $('body').toggleClass('night');
+            });
+        })
+
+    </script>
+</head>
+<body class="style-preview">
+
+	<h1 class="wix-style-header">Wix Style - All you need to know is here</h1>
+	<h2 class="wix-style-sub-header">Variables</h1>
+
+    <section class="fonts">
+        <h2>Font family</h2>
+        <ul>
+            <li class="helvetica-neue-35">$wix-helvetica-35</li>
+            <li class="helvetica-neue-45">$wix-helvetica-45</li>
+            <li class="helvetica-neue-55">$wix-helvetica-55</li>
+            <li class="helvetica-neue-65">$wix-helvetica-65</li>
+            <li class="helvetica-neue-75">$wix-helvetica-75</li>
+        </ul>
+    </section>
+
+    <section class="font-sizes">
+        <h2>Font sizes</h2>
+        <ul>
+            <li class="font-size-smallest">$wix-font-size-smallest</li>
+            <li class="font-size-small">$wix-font-size-small</li>
+            <li class="font-size-normal">$wix-font-size-normal</li>
+            <li class="font-size-title">$wix-font-size-title</li>
+            <li class="font-size-big-title">$wix-font-size-big-title</li>
+            <li class="font-size-page-header-small">$wix-font-size-page-header-small</li>
+            <li class="font-size-page-header">$wix-font-size-page-header</li>
+            <li class="font-size-page-header-bigger">$wix-font-size-page-header-bigger</li>
+            <li class="font-size-page-header-biggest">$wix-font-size-page-header-biggest</li>
+        </ul>
+    </section>
+
+    <section class="colors">
+        <div class="column">
+            <h2>Color Conventions</h2>
+            <ul>
+                <li class="color-primary">$wix-color-primary</li>
+                <li class="color-premium">$wix-color-premium</li>
+                <li class="color-market">$wix-color-market</li>
+                <li class="color-highlight">$wix-color-highlight</li>
+                <li class="color-success">$wix-color-success</li>
+                <li class="color-warn">$wix-color-warn</li>
+                <li class="color-error">$wix-color-error</li>
+            </ul>
+        </div>
+        <div class="column">
+            <h2>50 Shades of Gray</h2>
+            <ul>
+                <li class="color-black">$wix-black</li>
+                <li class="color-gray-darkest">$wix-gray-darkest</li>
+                <li class="color-gray-darker">$wix-gray-darker</li>
+                <li class="color-gray-dark">$wix-gray-dark</li>
+                <li class="color-gray">$wix-gray</li>
+                <li class="color-gray-light">$wix-gray-light</li>
+                <li class="color-gray-lighter">$wix-gray-lighter</li>
+                <li class="color-gray-lightest">$wix-gray-lightest</li>
+                <li class="color-white">$wix-white</li>
+            </ul>
+        </div>
+    </section>
+
+    <h2 class="wix-style-sub-header">CSS Classes</h2>
+
+    <section class="buttons" style="background-color: #f3f3f3;">
+        <h2>Buttons</h2>
+        <p>To create a button you need a <code>&lt;button&gt;</code> or an <code>&lt;a&gt;</code> element.</p>
+        <p>Add <code>'btn-default'</code> class for a basic clean button.
+            <div>
+                <button type="button" class="btn-default">btn-default</button>
+                <button type="button" class="btn-primary">btn-primary</button>
+                <button type="button" class="btn-borderless">btn-borderless</button>
+            </div>
+            <div>
+                <button type="button" class="btn-default btn-large">btn-default btn-large</button>
+                <button type="button" class="btn-primary btn-large">btn-primary btn-large</button>
+                <button type="button" class="btn-borderless btn-large">btn-borderless btn-large</button>
+            </div>
+            <div>
+                <button type="button" class="btn-default btn-small">btn-default btn-small</button>
+                <button type="button" class="btn-primary btn-small">btn-primary btn-small</button>
+                <button type="button" class="btn-borderless btn-small">btn-borderless btn-small</button>
+            </div>
+
+        </p>
+        <p>Add <code>'btn-primary'</code> class for a basic clean button.
+            <a class="btn-primary">btn-primary</a>
+            <a class="btn-default-premium">btn-default-premium</a>
+            <a class="btn-primary-premium">btn-primary-premium</a>
+            <a class="btn-primary-market">btn-primary-market</a>
+            <a class="btn-default">btn-default</a>
+            <a class="btn-borderless disabled">btn-borderless</a>
+            <button type="button" class="btn-primary-warn disabled">btn-primary-warn</button>
+        </p>
+        <p>
+            Add <code>'btn-large'</code> class for a large button.
+            <button type="button" class="btn-default btn-large">btn-default btn-large</button>
+            <button type="button" class="btn-primary btn-large" style="margin-left: 20px;">btn-primary btn-large</button>
+        </p>
+        <p>
+            You can disable a button by adding a class <code>'disabled'</code> or by adding an attribute <code>disabled="disabled"</code> (will work nicely with angular forms).
+            <button type="button" class="btn-default disabled">button disabled</button>
+            <button type="button" class="btn-primary" disabled="disabled">button-action + disabled="disabled"</button>
+            <a class="btn-primary disabled">disabled link</a>
+        </p>
+            <!--<button type="button" class="btn-borderless">btn-borderless</button>-->
+        <p>
+            Whatever you do -
+            <button type="button" class="btn-primary-warn" id="night-button">don't click this button</button>
+        </p>
+    </section>
+    <section class="inputs wix-style-general-experiment">
+        <h2>Inputs and textareas</h2>
+        <p>Input fields and textareas don't require any classes, when you add <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code> you will receive the styling for these elements: </p>
+        <p><input type="text" name="Regular input" value="This is a regular <input> element"></p>
+        <p><input type="text" name="Regular input" placeholder="This is how a regular input placeholder will look like"></p>
+        <p><input type="text" name="Regular input" value="This is an input that has a class that starts with ng-invalid" class="fake-class ng-invalid another-fake-class"></p>
+        <p><input type="text" name="Regular input" value="This is a bigger input with a class 'input-large'" class="input-large"></p>
+        <p><textarea>This is a simple text area with multiple lines</textarea></p>
+        <p><div class="input">It can also be a div with class 'input'</div></p>
+        <p><input class="btn-primary" type="submit" name="Regular input" value="This is <input> with type 'submit' - it won't get the input design" class="input-large"></p>
+        <p><input type="checkbox" name="" value="">This is input type=checkbox and it will also won't be affected</p>
+    </section>
+    <section class="dropdowns">
+        <h2>Dropdown</h2>
+        <p>This is the base html for a dropdown:</p>
+        <code style="white-space: pre-wrap; display: block; margin-bottom: 20px;">
+&lt;div class="dropdown"&gt;
+    &lt;div&gt;Choose Item&lt;/div&gt;
+    &lt;ul&gt;
+        &lt;li&gt;Option 1&lt;/li&gt;
+        &lt;li&gt;Option 2&lt;/li&gt;
+        &lt;li&gt;Option 3&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+        </code>
+        <p>You can add <code>'dropdown-large'</code> class to get the bigger version of the dropdown field</p>
+        <p>You can add <code>'dropdown-error'</code> to get an error mode of the dropdown</p>
+        <p>You can add <code>'dropdown-no-hover'</code> so that dropdown list will not be visible on hover</p>
+        <p>You can add <code>'dropdown-open'</code> so that dropdown list will be visible regardless of hover</p>
+        <div class="dropdown">
+            <div>Choose Item</div>
+            <ul>
+              <li>Option 1</li>
+              <li>Option 2</li>
+              <li>Option 3</li>
+            </ul>
+        </div>
+        <div class="dropdown dropdown-error">
+            <div>Dropdown with 'dropdown-error'</div>
+            <ul>
+                <li>Second option</li>
+                <li>Third option</li>
+                <li>Fourth option</li>
+            </ul>
+        </div>
+        <div class="dropdown">
+            <div>Overflowing text is supported 123456789</div>
+            <ul>
+                <li>Second option</li>
+            </ul>
+        </div>
+        <div class="dropdown dropdown-large">
+            <div>Dropdown with 'dropdown-large'</div>
+            <ul>
+                <li>Second option</li>
+                <li>Third option</li>
+                <li>Fourth option</li>
+            </ul>
+        </div>
+        <div class="dropdown dropdown-no-hover" style="margin-bottom: 140px;">
+            <div>Dropdown with 'dropdown-no-hover'</div>
+            <ul>
+                <li>Second option</li>
+            </ul>
+        </div>
+        <div class="dropdown dropdown-open">
+            <div>Dropdown with 'dropdown-open'</div>
+            <ul>
+                <li>Second option</li>
+                <li>Third option</li>
+                <li>Fourth option</li>
+            </ul>
+        </div>
+        <p style="clear: both">Some text that exlains this component</p>
+    </section>
+    <section class="icon-fonts">
+    <h2>Icons font</h2>
+    <p> 2 ways to use the icons font:</p>
+    <p> 1. Can be added as a class: <code>&lt;i class=&quot;wix-svg-font-icons-arrow-down&quot;&gt;&lt;/i&gt;</code></p>
+    <p> 2. Can be added via @mixin:  <code>@include get-svg-font-icon(&lt;icon-family&gt;, &lt;icon-name&gt;);</code>, for example: <code>@include get-svg-font-icon("wix-svg-font-icons", "wix-svg-font-icons-check");</code></p>
+    <br/>
+    <h3>List of font classes</h3>
+    <ul>
+        <p><i class="wix-svg-font-icons-arrow-left"></i> wix-svg-font-icons-arrow-left</p>
+        <p><i class="wix-svg-font-icons-arrow-top"></i> wix-svg-font-icons-arrow-top</p>
+        <p><i class="wix-svg-font-icons-arrow-right"></i> wix-svg-font-icons-arrow-right</p>
+        <p><i class="wix-svg-font-icons-arrow-down"></i> wix-svg-font-icons-arrow-down</p>
+        <p><i class="wix-svg-font-icons-check"></i> wix-svg-font-icons-check</p>
+        <p><i class="wix-svg-font-icons-x"></i> wix-svg-font-icons-x</p>
+        <p><i class="wix-svg-font-icons-plus"></i> wix-svg-font-icons-plus</p>
+        <p><i class="wix-svg-font-icons-info"></i> wix-svg-font-icons-info</p>
+    </ul>
+    </section>
+
+    <section class="wix-elements">
+        <h2>Wix Elements Default</h2>
+        <ul>
+            <h1>&lt;h1&gt;</h1>
+            <h2>&lt;h2&gt;</h2>
+            <h3>&lt;h3&gt;</h3>
+            <h4>&lt;h4&gt;</h4>
+        </ul>
+    </section>
+
+	<section>
+		<h2>General style modifiers</h2>
+		<h3>Text</h3>
+		<div class="is-crossed">Crossed text</div>
+
+		<div class="clearfix">
+			<h3>Floats</h3>
+			<p>Note that there is also a `clearfix` class applied.</p>
+			<span class="pull-right">Pull right</span>
+			<span class="pull-left">Pull left</span>
+		</div>
+	</section>
+</body>
+</html>

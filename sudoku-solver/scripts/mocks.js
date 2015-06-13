@@ -1,0 +1,2 @@
+"use strict";angular.module("sodukuAppMocks",["ngMockE2E"]).run(["$httpBackend",function(a){a.whenGET(/.*/).passThrough(),a.whenPOST(/.*/).passThrough(),a.whenPUT(/.*/).passThrough(),a.whenDELETE(/.*/).passThrough()}]);
+//# sourceMappingURL=mocks.js.map

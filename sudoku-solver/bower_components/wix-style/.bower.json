@@ -1,0 +1,37 @@
+{
+  "name": "style",
+  "version": "2.2.22",
+  "main": "app/styles/style.scss",
+  "ignore": [
+    ".*",
+    "!dist/.tmp",
+    "Gemfile*",
+    "Gruntfile.js",
+    "pom.xml",
+    "*.json",
+    "*.conf.js",
+    "app",
+    "test",
+    "maven",
+    "*.sublime*",
+    "protractor-conf.js"
+  ],
+  "dependencies": {
+    "jquery": "~2.0.3",
+    "uri.js": "~1.13.1",
+    "angular": "~1.3.15"
+  },
+  "devDependencies": {
+    "es5-shim": "~2.1.0"
+  },
+  "homepage": "https://github.com/wix/wix-style",
+  "_release": "2.2.22",
+  "_resolution": {
+    "type": "version",
+    "tag": "2.2.22",
+    "commit": "03bf8803843e955d71eb636757c69db5ccf45401"
+  },
+  "_source": "git@github.com:wix/wix-style.git",
+  "_target": "*",
+  "_originalSource": "wix-style"
+}

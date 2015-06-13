@@ -1,0 +1,48 @@
+// ======================================================================
+// =| TPA Styles |=======================================================
+// ======================================================================
+
+// TPA Colors
+// ----------------------------------------------------------------------
+$tpa-color-1: unquote("{{color-1}}");
+$tpa-color-2: unquote("{{color-2}}");
+$tpa-color-3: unquote("{{color-3}}");
+$tpa-color-4: unquote("{{color-4}}");
+$tpa-color-5: unquote("{{color-5}}");
+$tpa-color-6: unquote("{{color-6}}");
+$tpa-color-7: unquote("{{color-7}}");
+$tpa-color-8: unquote("{{color-8}}");
+$tpa-color-9: unquote("{{color-9}}");
+$tpa-color-10: unquote("{{color-10}}");
+$tpa-color-11: unquote("{{color-11}}");
+$tpa-color-12: unquote("{{color-12}}");
+$tpa-color-13: unquote("{{color-13}}");
+$tpa-color-14: unquote("{{color-14}}");
+$tpa-color-15: unquote("{{color-15}}");
+$tpa-color-16: unquote("{{color-16}}");
+$tpa-color-17: unquote("{{color-17}}");
+$tpa-color-18: unquote("{{color-18}}");
+$tpa-color-19: unquote("{{color-19}}");
+$tpa-color-20: unquote("{{color-20}}");
+$tpa-color-21: unquote("{{color-21}}");
+$tpa-color-22: unquote("{{color-22}}");
+$tpa-color-23: unquote("{{color-23}}");
+$tpa-color-24: unquote("{{color-24}}");
+$tpa-color-25: unquote("{{color-25}}");
+
+// TPA Fonts
+// ----------------------------------------------------------------------
+// We need to use ; because the from TPA includes "font: " as a prefix,
+// so the outcome after replace is  something like -
+// 		font:; font: normal normal normal 14px/1.2em arial"ms pgothic",dotum,helvetica,sans-serif
+$tpa-font-0: unquote("; {{Title}}");
+$tpa-font-1: unquote("; {{Menu}}");
+$tpa-font-2: unquote("; {{Page-title}}");
+$tpa-font-3: unquote("; {{Heading-XL}}");
+$tpa-font-4: unquote("; {{Heading-L}}");
+$tpa-font-5: unquote("; {{Heading-M}}");
+$tpa-font-6: unquote("; {{Heading-S}}");
+$tpa-font-7: unquote("; {{Body-L}}");
+$tpa-font-8: unquote("; {{Body-M}}");
+$tpa-font-9: unquote("; {{Body-S}}");
+$tpa-font-10: unquote("; {{Body-XS}}");

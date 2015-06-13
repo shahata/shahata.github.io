@@ -1,0 +1,4 @@
+var petriConstants = {
+  'scopes': {},
+  'experiments': {}
+};

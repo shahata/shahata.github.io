@@ -1,0 +1,93 @@
+<!doctype html>
+<!-- #if( false )
+  Prerequisites from server model:
+  --------------------------------
+  en, true, {},
+  , 
+  ${clientTopology.sodukuStaticsUrl},
+  ${clientTopology.staticBaseUrl},
+
+  More details at: http://kb.wixpress.com/display/dashboard/How+to+integrate+server+with+index.vm
+#end -->
+<!--
+  #if( false )
+  DO NOT TOUCH!!
+  --------------
+  #end
+  #set( $languages = ["de","en","es","fr","it","ja","ko","pl","pt","ru","tr","nl","da"] )
+  #if( !$languages.contains($locale) )
+    #set( $locale = "en" )
+  #end
+  #set( $staticsUrl = $clientTopology.sodukuStaticsUrl )
+  #set( $staticBaseUrl = $clientTopology.staticBaseUrl )
+-->
+<html ng-app="sodukuApp">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>soduku</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <meta name="robots" content="noindex, nofollow">
+
+    <link rel="stylesheet" href="//static.parastorage.com/services/third-party/fonts/Helvetica/fontFace.css">
+    <!-- #if( !${debug} ) -->
+<link rel="stylesheet" href="styles/main.css">
+<!-- #else -#if( false )#end->
+<link rel="stylesheet" href="_debug_styles/main.css"><!-- #end -->
+
+    
+    
+    
+  </head>
+  <body>
+    
+    <!-- Add your site or application content here -->
+    <div class="container" ng-include="'views/main.html'"></div>
+    
+
+    <script src="bower_components/jquery/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-translate/angular-translate.js"></script>
+    <script src="bower_components/angular-i18n/angular-locale_en.js"></script>
+    <!-- #if( !${debug} ) -->
+<script src="scripts/locale/messages_en.js"></script>
+<!-- #else -#if( false )#end->
+<script src="_debug_scripts/locale/messages_en.js"></script><!-- #end -->
+    <!-- #if( !${debug} ) -->
+<script src="scripts/modules.js"></script>
+<!-- #else -#if( false )#end->
+<script src="bower_components/uri.js/src/URI.js"></script>
+<script src="bower_components/wix-angular/dist/wix-angular.js"></script>
+<script src="bower_components/wix-bi-logger/dist/scripts/bi-logger/wix-bi-angular.js"></script><!-- #end -->
+    <!-- #if( !${debug} ) -->
+<script src="scripts/scripts.js"></script>
+<!-- #else -#if( false )#end->
+<script src="_debug_scripts/app.js"></script>
+<script src="views/main.html.js"></script>
+<script src="_debug_scripts/controllers/main.js"></script><!-- #end -->
+
+    <!-- #if( true ) -->
+    <script src="bower_components/angular-mocks/angular-mocks.js"></script>
+    <!-- #if( !${debug} ) -->
+<script src="scripts/mocks.js"></script>
+<!-- #else -#if( false )#end->
+<script src="mock/server-api.js"></script><!-- #end -->
+    <script>
+      /* jshint ignore:start */
+      if ('true' === 'true') {
+        angular.module('sodukuApp').requires.push('sodukuAppMocks');
+      }
+    </script>
+    <!-- #end -->
+    <script>
+      angular.module('sodukuApp').config(function (wixAngularTopologyProvider, experimentManagerProvider) {
+        wixAngularTopologyProvider.setStaticsUrl('');
+        experimentManagerProvider.setExperiments(JSON.parse('{}'));
+      });
+    </script>
+    
+    
+    
+  </body>
+</html>

@@ -1,0 +1,47 @@
+// Input Class Generator
+@include wrapClassesInsideProjectClassIfExists() {
+  @if ($enable-inputs and $enable-wix-style-css) {
+
+    $button-regular-vertical-padding: 6px;
+    $button-large-vertical-padding: 10px;
+
+    %wix-style-input {
+      padding: $button-regular-vertical-padding 15px;
+      border-radius: 6px;
+      border: 1px solid lighten($wix-color-primary, 30%);
+      background: lighten($wix-color-primary, 42%);
+      box-shadow: none;
+      outline: none;
+      font-size: $wix-font-size-normal;
+      font-family: $wix-helvetica-55;
+      color: $wix-black;
+      &::-webkit-input-placeholder {
+        font-style: italic;
+      }
+
+      &:-ms-input-placeholder {
+        font-style: italic;
+      }
+
+      &:-moz-placeholder {
+        font-style: italic;
+      }
+
+      &:focus {
+        border: 1px solid $wix-color-primary;
+      }
+      &[class*="ng-invalid"] {
+        border: 1px solid $wix-color-error;
+      }
+
+      &.input-large {
+        padding: $button-large-vertical-padding 15px;
+      }
+    }
+
+    input[type=text], input[type=email], input[type=tel], input[type=number], input[type=url],
+    div.input, textarea {
+      @extend %wix-style-input;
+    }
+  }
+}

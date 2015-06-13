@@ -1,0 +1,168 @@
+@import "style";
+
+body {
+  margin: 0;
+  padding: 0;
+}
+.style-preview {
+
+  .wix-style-header {
+    font-size: $wix-font-size-page-header-biggest;
+    font-family: $wix-helvetica-35;
+    margin-left: 30px;
+    text-align: center;
+  }
+
+  .wix-style-sub-header {
+    font-size: $wix-font-size-page-header;
+    font-family: $wix-helvetica-45;
+    padding: 30px;
+    background: $wix-gray-darker;
+    color: $wix-white;
+    margin: 0;
+  }
+
+  code {
+    background: $wix-gray-darkest;
+    color: $wix-gray-lightest;
+    padding: 0 5px;
+  }
+
+	section {
+      border-top: dashed 1px $wix-black;
+      padding: 30px;
+      clear: both;
+	}
+
+  ul {
+    padding-left: 0;
+  }
+
+  li {
+    list-style-type: none;
+  }
+
+  h1 {
+    font-size: $wix-font-size-page-header;
+  }
+
+	[class^="glyphicon-"],
+	[class*=" glyphicon-"] {
+		font-size: 20px;
+	}
+
+  .fonts, .font-sizes {
+    font-size: $wix-font-size-title;
+    li {
+      display: block;
+      margin-right: 20px;
+    }
+  }
+
+  .helvetica-neue-35 { font-family: $wix-helvetica-35; }
+  .helvetica-neue-45 { font-family: $wix-helvetica-45; }
+  .helvetica-neue-55 { font-family: $wix-helvetica-55; }
+  .helvetica-neue-65 { font-family: $wix-helvetica-65; }
+  .helvetica-neue-75 { font-family: $wix-helvetica-75; }
+
+  .font-size-smallest { font-size: $wix-font-size-smallest};
+  .font-size-small { font-size: $wix-font-size-small};
+  .font-size-normal { font-size: $wix-font-size-normal};
+  .font-size-title { font-size: $wix-font-size-title};
+  .font-size-big-title { font-size: $wix-font-size-big-title};
+  .font-size-page-header-small { font-size: $wix-font-size-page-header-small};
+  .font-size-page-header { font-size: $wix-font-size-page-header};
+  .font-size-page-header-bigger { font-size: $wix-font-size-page-header-bigger};
+  .font-size-page-header-biggest { font-size: $wix-font-size-page-header-biggest};
+
+  .colors {
+
+    display: flex;
+
+
+    ul {
+      padding-left: 0;
+    }
+
+    li {
+      list-style-type: none;
+      color: $wix-white;
+      width: 300px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .column {
+      margin-right: 50px;
+      display: inline-block;
+    }
+
+    .blue { background-color: $wix-blue; };
+    .purple { background-color: $wix-purple; };
+    .green { background-color: $wix-green; };
+    .yellow { background-color: $wix-yellow; };
+    .orange { background-color: $wix-orange; };
+    .red { background-color: $wix-red; };
+
+    .color-primary { background-color: $wix-color-primary; }
+    .color-premium { background-color: $wix-color-premium; }
+    .color-market { background-color: $wix-color-market; }
+    .color-highlight { background-color: $wix-color-highlight; }
+    .color-success { background-color: $wix-color-success; }
+    .color-warn { background-color: $wix-color-warn; }
+    .color-error { background-color: $wix-color-error; }
+
+    .color-white {background-color: $wix-white; color: $wix-black; border: 1px solid $wix-gray-lightest; };
+    .color-gray-lightest {background-color: $wix-gray-lightest};
+    .color-gray-lighter {background-color: $wix-gray-lighter};
+    .color-gray-light {background-color: $wix-gray-light};
+    .color-gray {background-color: $wix-gray};
+    .color-gray-dark {background-color: $wix-gray-dark};
+    .color-gray-darker {background-color: $wix-gray-darker};
+    .color-gray-darkest {background-color: $wix-gray-darkest};
+    .color-black { background-color: $wix-black }
+
+  }
+
+  .buttons {
+    div {
+      margin-top: 15px;
+    }
+  }
+
+  .inputs {
+    input[type=text], div.input, textarea {
+      width: 500px;
+    }
+    textarea {
+      height: 50px;
+    }
+  }
+
+  .dropdowns {
+    margin-bottom: 170px;
+    .dropdown {
+      float: left;
+      margin-right: 30px;
+    }
+  }
+
+  .icon-fonts {
+    ul {
+      p {
+        display: inline-block;
+        width: 33%;
+      }
+    }
+  }
+
+}
+
+body {
+  transition: all 0.3s linear;
+}
+
+body.night {
+  background-color: $wix-gray-darkest;
+  color: $wix-white;
+}
