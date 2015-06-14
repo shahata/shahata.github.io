@@ -15,7 +15,7 @@ angular.module('sodukuPreload').run(['$templateCache', function ($templateCache)
     "  <input id='showPossibilities' ng-model='main.showPossibilities' type='checkbox'>\n" +
     "  <label for='showPossibilities'>show possibilities</label>\n" +
     "  <input id='showCode' ng-model='main.showCode' type='checkbox'>\n" +
-    "  <label for='showPossibilities'>show code</label>\n" +
+    "  <label for='showCode'>show code</label>\n" +
     "  <table>\n" +
     "    <tr ng-init='rowScope = this' ng-repeat='row in main.cells'>\n" +
     "      <td ng-repeat='cell in row' style='{{main.getStyle(rowScope.$index, $index)}}'>\n" +
